@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"log"
 	"os"
 	"time"
@@ -34,7 +35,7 @@ func (td ToDoListItem) ByTime() time.Time{
 
 
 func (td ToDoListItem) RemainingTime() time.Duration{
-	return td.ByTime().Sub(time.Now())
+	return time.Until(td.ByTime())
 }
 
 
@@ -54,7 +55,6 @@ func (td *ToDoListSqlite) List() error{
 	var allItems []ToDoListItem
 	sqlSelectAll := fmt.Sprintf(`
 		SELECT * FROM %s
-		ORDER BY createdAt DESC
 	`, td.toDoTableName)
 
 	td.db.Select(&allItems, sqlSelectAll)
@@ -65,8 +65,10 @@ func (td *ToDoListSqlite) List() error{
 			// color.Red(fmt.Sprintf("\t%s", item.String()))
 		}else{
 			// color.Green(fmt.Sprintf("\t%s", item.String()))
-			color.Green("\t%s", fmt.Sprintf("[%d] %s by ", item.Id, item.Do, ))
 			color.Set(color.Bold)
+			remaining := item.RemainingTime()
+			remainingHours := remaining.Hours() 
+			color.Green("\t%s", fmt.Sprintf("[%d] %s [%fd, %fh]", item.Id, item.Do, math.Mod(remainingHours, 24.0), remainingHours))
 		}
 	}
 

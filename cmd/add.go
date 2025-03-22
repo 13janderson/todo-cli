@@ -6,9 +6,10 @@ package cmd
 import (
 	"errors"
 	"todo/todo"
-
+	"fmt"
 	"github.com/spf13/cobra"
 )
+
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -21,6 +22,8 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error{
+		fmt.Println(args)
+		NewArgMatchBuilder().
 		if len(args) > 1{
 			return errors.New("this command does not support more than one argument. \n proper usage: td add x")
 		}else{
@@ -43,5 +46,6 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	addCmd.Flags().Int("h", 2, "number of hours to complete the task by")
+	addCmd.Flags().Int("d", 1, "number of days to complete the task by")
 }
