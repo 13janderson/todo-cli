@@ -6,6 +6,8 @@ import (
 
 func main(){
 	list := todo.NewToDoListSqlite()
+	defer list.Close()
+
 	list.Add(
 		todo.ToDoListItem{
 			Do: "test",
@@ -19,8 +21,7 @@ func main(){
 			ByDays: 1,
 		},
 	)
-	list.Remove(todo.ToDoListItem{
-		Do: "test",
-	})
+	list.Pop()
+
 }
 		

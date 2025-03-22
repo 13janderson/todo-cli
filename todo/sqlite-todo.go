@@ -59,7 +59,7 @@ func (td *ToDoListSqlite) Add(item ToDoListItem) {
 }
 
 func (td *ToDoListSqlite) Remove(item ToDoListItem) {
-	// This function is best effort. We first try to remove entries with item.Id.
+	// This function is best effort. We first try to remove entries with item.idId.
 	deleteWithId := (fmt.Sprintf(`
 			DELETE FROM %s
 			WHERE Id='%d'
@@ -85,20 +85,40 @@ func (td *ToDoListSqlite) Remove(item ToDoListItem) {
 		return
 	}
 
-	// Failing that we remove the most recent item
-
 }
 
 func (td *ToDoListSqlite) Pop() {
+	selectMaxId := (fmt.Sprintf(`
+		SELECT MAX(id) as id FROM %s
+	`, td.toDoTableName))
+	var returnResult []ToDoListItem
+	err := td.db.Select(&returnResult, selectMaxId)
+	if err != nil{
+		log.Fatal(err.Error())
+	}
+
+	if numRecords := len(returnResult); numRecords == 1 {
+		maxIdRecord := returnResult[0]
+		deleteMaxId := (fmt.Sprintf(`
+			DELETE FROM %s WHERE id=%d 
+			`, td.toDoTableName, maxIdRecord.Id))
+		res := td.ExecLogError(deleteMaxId)
+		if deleted, _ := res.RowsAffected(); deleted > 0{
+			fmt.Printf("Removed %d records.", deleted)
+			return
+		}
+
+	}else if numRecords > 1{
+		log.Fatalf("Failed to determine most recent to do list item. Got %d records.", numRecords)
+	}
 
 }
 
-func (td *ToDoListSqlite) Complete() {
-
+func (td *ToDoListSqlite) Complete(item ToDoListItem) {
+	td.Remove(item)
 }
 
 // Function must be called to close db conection
 func (td *ToDoListSqlite) Close() {
 	td.db.Close()
-
 }

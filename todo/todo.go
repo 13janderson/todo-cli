@@ -13,7 +13,7 @@ import (
 // Question of what the best way to store these is, simple JSON file with a default TTL is the first thought
 
 type ToDoListItem struct {
-	Id int
+	Id int `json:"do" db:"id"`
 	Do      string    `json:"do" db:"do"`
 	ByDays int       `json:"byDays" db:"byDays"`
 	ByHours int       `json:"byHours" db:"byHours"`
