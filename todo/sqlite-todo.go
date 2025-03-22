@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-
+	"time"
+	"github.com/fatih/color"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -22,27 +23,68 @@ func DefaultToDoListSqlite() (td *ToDoListSqlite) {
 		dbFileName:    ".todo.db",
 		toDoTableName: "todo",
 	}
+	td.openDbConnection()
+	
 	return td
 }
+
+func (td ToDoListItem) ByTime() time.Time{
+	return td.CreatedAt.Add(time.Hour * time.Duration(td.ByHours)).AddDate(0,0, td.ByDays)
+}
+
+
+func (td ToDoListItem) RemainingTime() time.Duration{
+	return td.ByTime().Sub(time.Now())
+}
+
 
 func (td *ToDoListSqlite) openDBFile() error{
 	if _, err := os.Open(td.dbFileName); err != nil{
 		return err
 	}
+	return nil
+}
+
+func (td *ToDoListSqlite) List() error{
+	if dbFileOpen := td.openDBFile(); dbFileOpen != nil{
+		return errors.New("to list was not initalised.\n run td init first")
+	}
+
+	// Select all entries in DB
+	var allItems []ToDoListItem
+	sqlSelectAll := fmt.Sprintf(`
+		SELECT * FROM %s
+		ORDER BY createdAt DESC
+	`, td.toDoTableName)
+
+	td.db.Select(&allItems, sqlSelectAll)
+
+	for _, item := range allItems{
+		if item.CreatedAt.After(time.Now()){
+			color.Set(color.BgRed, color.Bold)
+			// color.Red(fmt.Sprintf("\t%s", item.String()))
+		}else{
+			// color.Green(fmt.Sprintf("\t%s", item.String()))
+			color.Green("\t%s", fmt.Sprintf("[%d] %s by ", item.Id, item.Do, ))
+			color.Set(color.Bold)
+		}
+	}
 
 	return nil
+}
+
+func (td *ToDoListSqlite) openDbConnection() {
+	db, err := sqlx.Open("sqlite3", td.dbFileName)
+	td.db = db
+	if err != nil{
+		log.Fatal(err.Error())
+	}
 }
 
 func (td *ToDoListSqlite) Init() error{
 	if dbFileOpen := td.openDBFile(); dbFileOpen == nil{
 		return errors.New("to do list already exists in this directory.\n to remove it type: td rm")
 	}
-
-	db, err := sqlx.Open("sqlite3", td.dbFileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	td.db = db
 
 	td.ExecLogError((fmt.Sprintf(`
 			CREATE TABLE IF NOT EXISTS %s

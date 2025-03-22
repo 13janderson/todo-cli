@@ -2,11 +2,11 @@ package todo
 
 import (
 	// "crypto/sha256"
-	"encoding/json"
 	"bufio"
+	"encoding/json"
 	"fmt"
-	"hash"
 	"os"
+	"time"
 )
 
 // Need a simple way to keep track of to do's in specific repos or directories
@@ -14,15 +14,17 @@ import (
 
 type ToDoListItem struct {
 	Id int `json:"do" db:"id"`
+	CreatedAt time.Time `json:"createdAt" db:"createdAt"`
 	Do      string    `json:"do" db:"do"`
 	ByDays int       `json:"byDays" db:"byDays"`
 	ByHours int       `json:"byHours" db:"byHours"`
-	Hash hash.Hash `json:"hash" db:"hash"`
 }
 
 type ToDoList interface {
 	// Init new to do list
 	Init()
+	// Writes all list items in readable format to stdout
+	List() error
 	Add(item ToDoListItem)
 	// Remove specific item
 	Remove(item ToDoListItem)
