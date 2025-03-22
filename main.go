@@ -12,8 +12,15 @@ func main(){
 			ByDays: 1,
 		},
 	)
+
+	list.Add(
+		todo.ToDoListItem{
+			Do: "this is not a drill",
+			ByDays: 1,
+		},
+	)
 	list.Remove(todo.ToDoListItem{
-		Id: 1,
+		Do: "test",
 	})
 }
 		

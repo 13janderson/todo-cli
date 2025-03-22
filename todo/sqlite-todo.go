@@ -1,6 +1,7 @@
 package todo
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"github.com/jmoiron/sqlx"
@@ -37,12 +38,13 @@ func (td *ToDoListSqlite) Init() {
 		`, td.toDoTableName)))
 }
 
- func (td *ToDoListSqlite) ExecLogError(sql string){
+ func (td *ToDoListSqlite) ExecLogError(sql string) sql.Result{
 	db := td.db
-	_, err := db.Exec(sql)
+	res, err := db.Exec(sql)
 	if err != nil {
 		log.Fatal(err)
 	}
+	return res
 }
 
 
@@ -58,21 +60,30 @@ func (td *ToDoListSqlite) Add(item ToDoListItem) {
 
 func (td *ToDoListSqlite) Remove(item ToDoListItem) {
 	// This function is best effort. We first try to remove entries with item.Id.
-	sqlSelectById:= (fmt.Sprintf(`
-			SELECT Id from %s
+	deleteWithId := (fmt.Sprintf(`
+			DELETE FROM %s
 			WHERE Id='%d'
 		`, td.toDoTableName, item.Id))
 
-	fmt.Println(sqlSelectById)
-	var selectReturn []ToDoListItem
-	err := td.db.Select(&selectReturn,  sqlSelectById)
-	if err != nil{
-		log.Fatal(err.Error())
+	fmt.Println(deleteWithId)
+	res := td.ExecLogError(deleteWithId)
+	if deleted, _ := res.RowsAffected(); deleted > 0{
+		fmt.Printf("Removed %d records.", deleted)
+		return
 	}
 
-	fmt.Println(selectReturn)
-
 	// Failing that, we try to remove any items with a matching Do
+	deleteLikeDo := (fmt.Sprintf(`
+			DELETE FROM %s
+			WHERE Do LIKE '%%%s'
+		`, td.toDoTableName, item.Do))
+
+	fmt.Println(deleteWithId)
+	res = td.ExecLogError(deleteLikeDo)
+	if deleted, _ := res.RowsAffected(); deleted > 0{
+		fmt.Printf("Removed %d records.", deleted)
+		return
+	}
 
 	// Failing that we remove the most recent item
 
