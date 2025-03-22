@@ -2,30 +2,42 @@ package todo
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
+	"os"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func test(){
-}
 type ToDoListSqlite struct {
 	dbFileName    string
 	db            *sqlx.DB
 	toDoTableName string
 }
 
-func NewToDoListSqlite() (td *ToDoListSqlite) {
+func DefaultToDoListSqlite() (td *ToDoListSqlite) {
 	td = &ToDoListSqlite{
 		dbFileName:    ".todo.db",
 		toDoTableName: "todo",
 	}
-	td.Init()
 	return td
 }
 
-func (td *ToDoListSqlite) Init() {
+func (td *ToDoListSqlite) openDBFile() error{
+	if _, err := os.Open(td.dbFileName); err != nil{
+		return err
+	}
+
+	return nil
+}
+
+func (td *ToDoListSqlite) Init() error{
+	if dbFileOpen := td.openDBFile(); dbFileOpen == nil{
+		return errors.New("to do list already exists in this directory.\n to remove it type: td rm")
+	}
+
 	db, err := sqlx.Open("sqlite3", td.dbFileName)
 	if err != nil {
 		log.Fatal(err)
@@ -36,6 +48,8 @@ func (td *ToDoListSqlite) Init() {
 			CREATE TABLE IF NOT EXISTS %s
 			(id INTEGER PRIMARY KEY, do TEXT, createdAt TIMESTAMP, byDays int , byHours int )
 		`, td.toDoTableName)))
+		
+	return nil
 }
 
  func (td *ToDoListSqlite) ExecLogError(sql string) sql.Result{
