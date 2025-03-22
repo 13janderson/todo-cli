@@ -1,4 +1,4 @@
-package main
+package todo
 
 import (
 	// "crypto/sha256"
@@ -13,9 +13,11 @@ import (
 // Question of what the best way to store these is, simple JSON file with a default TTL is the first thought
 
 type ToDoListItem struct {
-	Do      string    `json:"do"`
-	TTLDays int       `json:"by"`
-	Hash hash.Hash `json:"hash"`
+	Id int
+	Do      string    `json:"do" db:"do"`
+	ByDays int       `json:"byDays" db:"byDays"`
+	ByHours int       `json:"byHours" db:"byHours"`
+	Hash hash.Hash `json:"hash" db:"hash"`
 }
 
 type ToDoList interface {
@@ -26,6 +28,8 @@ type ToDoList interface {
 	Remove(item ToDoListItem)
 	// Removes most recent to do added
 	Pop()
+
+	Complete()
 }
 
 type ToDoListJson struct {
@@ -80,11 +84,6 @@ func (td *ToDoListJson) Pop() {
 
 }
 
-func main() {
-	td := NewToDoListJson()
-	td.Add(ToDoListItem{
-		Do: "abc",
-	})
-	td.Remove(ToDoListItem{
-	})
+func (td *ToDoListJson) Complete(){
+
 }
