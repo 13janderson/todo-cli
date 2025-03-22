@@ -6,7 +6,6 @@ package cmd
 import (
 	"errors"
 	"todo/todo"
-	"fmt"
 	"github.com/spf13/cobra"
 )
 
@@ -21,17 +20,19 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+
 	RunE: func(cmd *cobra.Command, args []string) error{
-		fmt.Println(args)
-		NewArgMatchBuilder().
-		if len(args) > 1{
-			return errors.New("this command does not support more than one argument. \n proper usage: td add x")
-		}else{
-			todo.DefaultToDoListSqlite().Add(todo.ToDoListItem{
-				Do: args[0],
-			})
-			return nil
+		if len(args) == 0{
+			return errors.New("this command requires at least one argument. \n proper usage: td add x ?d ?h")
 		}
+
+		todo.DefaultToDoListSqlite().Add(todo.ToDoListItem{
+			Do:  todo.GetArgString(args, 0, "Nothing"),
+			ByDays:  todo.GetArg(args, 1, 2, todo.StringToInt),
+			ByHours:  todo.GetArg(args, 2, 1, todo.StringToInt),
+		})
+
+		return nil
 	},
 }
 
@@ -46,6 +47,4 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	addCmd.Flags().Int("h", 2, "number of hours to complete the task by")
-	addCmd.Flags().Int("d", 1, "number of days to complete the task by")
 }

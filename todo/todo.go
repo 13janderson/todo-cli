@@ -5,10 +5,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
+	"strconv"
 	"time"
 )
-
 
 // Need a simple way to keep track of to do's in specific repos or directories
 // Question of what the best way to store these is, simple JSON file with a default TTL is the first thought
@@ -20,7 +21,6 @@ type ToDoListItem struct {
 	ByDays    int       `json:"byDays" db:"byDays"`
 	ByHours   int       `json:"byHours" db:"byHours"`
 }
-
 
 type ToDoList interface {
 	// Init new to do list
@@ -84,24 +84,28 @@ func (td *ToDoListJson) Remove(item ToDoListItem) {
 	fmt.Println(tdItem.Do)
 }
 
-func (td *ToDoListJson) Pop() {
 
+func GetArgString (args []string, idx int, defaultValue string) string{
+	return GetArg(args, idx, defaultValue, Identity[string])
 }
 
-func (td *ToDoListJson) Complete() {
-
+func GetArg[T any] (args []string, idx int, defaultValue T, convert func(string) (T, error)) T{
+	var err error
+	var arg T
+	if idx < len(args) {
+		arg, err = convert(args[idx])
+		if err != nil{
+			log.Fatal(err.Error())
+		}
+		return arg
+	}
+	return defaultValue
 }
 
-type ToDoListItemBuilder struct{
-	td *ToDoListItem
+func Identity[T any](t T) (T, error ){
+	return t, nil
 }
 
-
-
-func (tdb *ToDoListItemBuilder) WithDo(do string) {
-
-}
-
-func (tdb *ToDoListItemBuilder) Build() (*ToDoListItem){
-	return tdb.td
+func StringToInt(s string) (int, error) {
+	return strconv.Atoi(s)
 }
