@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"math"
 	"log"
 	"os"
 	"time"
@@ -60,19 +59,40 @@ func (td *ToDoListSqlite) List() error{
 	td.db.Select(&allItems, sqlSelectAll)
 
 	for _, item := range allItems{
-		if item.CreatedAt.After(time.Now()){
-			color.Set(color.BgRed, color.Bold)
-			// color.Red(fmt.Sprintf("\t%s", item.String()))
+		remainingTime := item.RemainingTime()
+		color.Set(color.Bold)
+		if remainingTime <= time.Duration(0){
+			color.Red("\t%s\t", fmt.Sprintf("[%d] %s EXPIRED", item.Id, item.Do))
 		}else{
 			// color.Green(fmt.Sprintf("\t%s", item.String()))
-			color.Set(color.Bold)
-			remaining := item.RemainingTime()
-			remainingHours := remaining.Hours() 
-			color.Green("\t%s", fmt.Sprintf("[%d] %s [%fd, %fh]", item.Id, item.Do, math.Mod(remainingHours, 24.0), remainingHours))
+			color.HiGreen("\t%s\t", fmt.Sprintf("[%d] %s %s", item.Id, item.Do, DurationHumanReadable(remainingTime)))
 		}
 	}
-
 	return nil
+}
+
+func DurationHumanReadable(d time.Duration) string{
+	var parts []string
+	
+	day := time.Hour * 24
+	days := int(d / day)
+	afterDays := d - time.Duration(days)*day
+	hours := int(afterDays / time.Hour)
+	afterHours := afterDays - time.Duration(time.Hour)*time.Duration(hours)
+	mins := int(afterHours / time.Minute)
+
+	if days > 0 {
+		parts = append(parts, fmt.Sprintf("%dd", days))
+	}
+	if hours > 0 {
+		parts = append(parts, fmt.Sprintf("%dh", hours))
+	}
+	if mins > 0 {
+		parts = append(parts, fmt.Sprintf("%dm", mins))
+	}
+
+	return fmt.Sprintf("%s", parts)
+
 }
 
 func (td *ToDoListSqlite) openDbConnection() {
