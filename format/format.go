@@ -3,8 +3,10 @@ package format
 import (
 	"fmt"
 	"strings"
-	"time"
+	"todo/todo"
+	"math"
 	"github.com/fatih/color"
+	"time"
 )
 
 func Indent(msg string) string {
@@ -57,5 +59,59 @@ func DurationHumanReadable(d time.Duration) string{
 	}
 
 	return fmt.Sprintf("%s", parts)
+
+}
+
+
+func ShowToDoListItems(tdl []todo.ToDoListItem){
+	for _, td := range tdl{
+		remainingTime := td.RemainingTime()
+		// Want the colour to get progressively more red and less green until expiry
+		if remainingTime <= time.Duration(0){
+			showToDoListItemExpired(td)
+		}else{
+			showToDoListItemByRemainingTimeFraction(td, td.RemainingTimeFraction())
+		}
+	}
+}
+
+func showToDoListItemExpired(td todo.ToDoListItem){
+	color.Red(Indent(fmt.Sprintf("[%d] %s EXPIRED", td.Id, td.Do)))
+}
+
+func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64 ){
+	fmt.Println(remainingTimeFraction)
+	color.Set(color.Bold)
+	remainingTime := td.RemainingTime()
+	c := color.RGB(int ((1 - remainingTimeFraction)*255), int((remainingTimeFraction)*255), 0)
+	c.Printf(Indent(fmt.Sprintf("%s %s", td.String(), DurationHumanReadable(remainingTime))))
+}
+
+// Similar to function above but we normalise the remaining time fractions
+func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem){
+	max := -math.MaxFloat64
+	var remainingTimeFractions []float64
+	for _, td := range tdl{
+		tdRemainingTime := td.RemainingTimeFraction()
+		max = math.Max(tdRemainingTime, max)
+		remainingTimeFractions = append(remainingTimeFractions, tdRemainingTime)
+	}
+
+	// fmt.println(tdl)
+	// fmt.println(remainingtimefractions)
+	
+	if max != 0{
+		// Normalise between 0 and 1 to use entire colour spectrum properly
+		for i, rt := range remainingTimeFractions{
+			remainingTimeFractions[i] = rt / max
+		}
+	}
+
+	// fmt.Println(remainingTimeFractions)
+
+	// Use remaining time fractions to display like normal
+	for i, rtf := range remainingTimeFractions{
+		showToDoListItemByRemainingTimeFraction(tdl[i], rtf)
+	}
 
 }

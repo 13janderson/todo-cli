@@ -20,12 +20,9 @@ var lsCmd = &cobra.Command{
 		items, err := todo.DefaultToDoListSqlite().List()
 		if err != nil{
 			format.ShowWarningMessage(err.Error())
+		}else{
+			format.ShowToDoListItemsNormalised(items)
 		}
-
-		for _, item := range items{
-			item.ShowToDoListItem()
-		}
-
 	},
 }
 
