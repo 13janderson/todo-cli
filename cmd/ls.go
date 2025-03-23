@@ -1,12 +1,12 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"todo/todo"
 	"errors"
+	"todo/todo"
+
 	"github.com/spf13/cobra"
 )
 
@@ -20,8 +20,8 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	RunE: func(cmd *cobra.Command, args []string) error{
-		if len(args) > 0{
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) > 0 {
 			return errors.New("this command does not support any arguments. \n proper usage: td ls")
 		}
 

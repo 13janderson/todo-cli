@@ -5,10 +5,11 @@ package cmd
 
 import (
 	"errors"
+	"time"
 	"todo/todo"
+
 	"github.com/spf13/cobra"
 )
-
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -26,13 +27,16 @@ to quickly create a Cobra application.`,
 			return errors.New("this command requires at least one argument. \n proper usage: td add x ?d ?h")
 		}
 
-		todo.DefaultToDoListSqlite().Add(todo.ToDoListItem{
+		days := todo.GetArg(args, 1, 0, nil)
+		hours := todo.GetArg(args, 1, 2, nil)
+		createdAt := time.Now()
+		err := todo.DefaultToDoListSqlite().Add(todo.ToDoListItem{
 			Do:  todo.GetArgString(args, 0, "Nothing"),
-			ByDays:  todo.GetArg(args, 1, 0, todo.StringToInt),
-			ByHours:  todo.GetArg(args, 2, 1, todo.StringToInt),
+			// Default time will be 01 01 1970 00 (I think)
+			DoBy: createdAt.Add(time.Hour * time.Duration(hours)).AddDate(0,0, days),
 		})
 
-		return nil
+		return err
 	},
 }
 

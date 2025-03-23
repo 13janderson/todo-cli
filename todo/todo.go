@@ -9,10 +9,8 @@ import (
 
 type ToDoListItem struct {
 	Id        int       `json:"id" db:"id"`
-	CreatedAt time.Time `json:"createdAt" db:"createdAt"`
 	Do        string    `json:"do" db:"do"`
-	ByDays    int       `json:"byDays" db:"byDays"`
-	ByHours   int       `json:"byHours" db:"byHours"`
+	DoBy time.Time `json:"doBy" db:"doBy"`
 }
 
 type ToDoList interface {

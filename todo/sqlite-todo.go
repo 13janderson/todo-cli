@@ -28,13 +28,10 @@ func DefaultToDoListSqlite() (td *ToDoListSqlite) {
 	return td
 }
 
-func (td ToDoListItem) ByTime() time.Time{
-	return td.CreatedAt.Add(time.Hour * time.Duration(td.ByHours)).AddDate(0,0, td.ByDays)
-}
 
 
 func (td ToDoListItem) RemainingTime() time.Duration{
-	return time.Until(td.ByTime())
+	return time.Until(td.DoBy)
 }
 
 
@@ -57,7 +54,9 @@ func (td *ToDoListSqlite) List() error{
 	`, td.toDoTableName)
 
 	td.db.Select(&allItems, sqlSelectAll)
+	fmt.Println(allItems)
 
+	// Would be nice to sort these by time
 	for _, item := range allItems{
 		remainingTime := item.RemainingTime()
 		color.Set(color.Bold)
@@ -110,7 +109,7 @@ func (td *ToDoListSqlite) Init() error{
 
 	td.ExecLogError((fmt.Sprintf(`
 			CREATE TABLE IF NOT EXISTS %s
-			(id INTEGER PRIMARY KEY, do TEXT, createdAt TIMESTAMP, byDays int , byHours int )
+			(id INTEGER PRIMARY KEY, do TEXT, doBy TIMESTAMP)
 		`, td.toDoTableName)))
 		
 	return nil
@@ -126,14 +125,26 @@ func (td *ToDoListSqlite) Init() error{
 }
 
 
-func (td *ToDoListSqlite) Add(item ToDoListItem) {
+func (td *ToDoListSqlite) Add(item ToDoListItem) error{
+
 	sqlInsert := (fmt.Sprintf(`
 			INSERT INTO %s
-			(do , createdAt, byDays, byHours)
+			(do , doBy)
 			VALUES
-			('%s',  CURRENT_TIMESTAMP, %d, %d)
-		`, td.toDoTableName, item.Do, item.ByDays, item.ByHours))
-	td.ExecLogError(sqlInsert)
+			(:do, :doBy)
+		`, td.toDoTableName, ))
+	res, err := td.db.NamedExec(sqlInsert, &item)
+	if err != nil{
+		return err
+	}else{
+		if rows, err := res.RowsAffected(); rows != 1{
+			if err != nil{
+				return err
+			}
+			return errors.New("Multiple rows created for a single insertion.")
+		}
+	}
+	return nil
 }
 
 func (td *ToDoListSqlite) Remove(item ToDoListItem) {
