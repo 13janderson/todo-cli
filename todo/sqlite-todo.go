@@ -50,7 +50,7 @@ func (td *ToDoListSqlite) openDBFile() error{
 func (td *ToDoListSqlite) List() ([]ToDoListItem, error){
 	var allItems []ToDoListItem
 	if dbFileOpen := td.openDBFile(); dbFileOpen != nil{
-		return allItems, errors.New("to list was not initalised.\n run td init first")
+		return allItems, errors.New("to list was not initalised.\nrun td init first")
 	}
 
 	// Select all entries in DB

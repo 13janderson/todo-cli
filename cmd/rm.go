@@ -4,7 +4,6 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"todo/todo"
@@ -15,19 +14,11 @@ import (
 // rmCmd represents the rm command
 var rmCmd = &cobra.Command{
 	Use:   "rm",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	RunE: func(cmd *cobra.Command, args []string) error{
+	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 1{
-			return errors.New("this command requires atr least one argument. \n proper usage: rm x where x is either an id or a string to match with")
+			format.ShowErrorMessage("this command cannot take more than one argument. \n proper usage: rm x where x is either an id or a string to match with")
 		}else if len(args) == 0{
-
-			return errors.New("this command requires at least one argument. \n proper usage: td add x ?d ?h")
+			format.ShowErrorMessage("this command requires at least one argument. \n proper usage: td rm x")
 		}else{
 			arg := args[0]
 			id, err := strconv.Atoi(arg)
@@ -43,7 +34,6 @@ to quickly create a Cobra application.`,
 			
 			deleted := todo.DefaultToDoListSqlite().Remove(toDoListItem)
 			format.RemovedMessage(fmt.Sprintf("Removed %d task(s)", deleted))
-			return nil
 		}
 	},
 }

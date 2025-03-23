@@ -4,7 +4,6 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"errors"
 	"todo/todo"
 	"todo/format"
 	"github.com/spf13/cobra"
@@ -13,27 +12,19 @@ import (
 // lsCmd represents the ls command
 var lsCmd = &cobra.Command{
 	Use:   "ls",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
-			return errors.New("this command does not support any arguments. \n proper usage: td ls")
+			format.ShowErrorMessage("this command does not support any arguments. \n proper usage: td ls")
 		}
 
 		items, err := todo.DefaultToDoListSqlite().List()
 		if err != nil{
-			return err
+			format.ShowWarningMessage(err.Error())
 		}
 
 		for _, item := range items{
 			format.ShowToDoListItem(item)
 		}
-		return nil
 
 	},
 }

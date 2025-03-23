@@ -4,7 +4,6 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"errors"
 	"regexp"
 	"strconv"
 	"fmt"
@@ -21,9 +20,9 @@ const DEFAULT_TO_DO_TIMEUNIT= DEFAULT_TO_DO_TIME + DEFAULT_TO_DO_UNIT
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
-	RunE: func(cmd *cobra.Command, args []string) error{
+	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0{
-			return errors.New("this command requires at least one argument. \n proper usage: td add x ?(d/h). For example td add 'have a pint' 1d to give yourself a day to have a pint")
+			format.ShowErrorMessage("this command requires at least one argument. \n proper usage: td add x ?(d/h). For example td add 'have a pint' 1d to give yourself a day to have a pint")
 		}
 
 		// Perform regex matching on days and hours arguments
@@ -55,9 +54,9 @@ var addCmd = &cobra.Command{
 		})
 
 		if err != nil{
+			format.ShowErrorMessage(err.Error())
 		}
 
-		return err
 	},
 }
 

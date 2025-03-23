@@ -1,14 +1,21 @@
 package format
 
-import(
+import (
 	"fmt"
+	"strings"
 	"time"
 	"todo/todo"
+
 	"github.com/fatih/color"
 )
 
-func indent() string {
-	return fmt.Sprintf("%*s", 4, "")
+func indent(msg string) string {
+	var ret string
+	lines := strings.Split(msg, "\n")
+	for _, l := range lines{
+		ret += fmt.Sprintf("%*s %s\n", 4, "", l)
+	}
+	return ret
 }
 
 func RemovedMessage(msg string){
@@ -16,25 +23,33 @@ func RemovedMessage(msg string){
 	color.Red(msg)
 }
 
-
 func ShowToDoListItem(td todo.ToDoListItem){
 	remainingTime := td.RemainingTime()
 	remainingTimeFraction := td.RemainingTimeFraction()
 	color.Set(color.Bold)
 	// Want the colour to get progressively more red and less green until expiry
 	if remainingTime <= time.Duration(0){
-		color.Red("%s [%d] %s EXPIRED\n", indent(), td.Id, td.Do)
+		color.Red(indent(fmt.Sprintf("[%d] %s EXPIRED\n", td.Id, td.Do)))
 	}else{
 		c := color.RGB(int ((1 - remainingTimeFraction)*255), int((remainingTimeFraction)*255), 0)
-		c.Printf("%s [%d] %s %s\n", indent(), td.Id, td.Do, DurationHumanReadable(remainingTime))
+		c.Printf(indent(fmt.Sprintf("[%d] %s %s\n", td.Id, td.Do, DurationHumanReadable(remainingTime))))
 	}
 }
 
 func ShowWarningMessage(msg string){
 	color.Set(color.Bold)
-	color.Yellow(msg)
+	color.Yellow(indent(msg))
 }
 
+func ShowErrorMessage(msg string){
+	color.Set(color.Bold)
+	color.Red(indent(msg))
+}
+
+func ShowSuccessMessage(msg string){
+	color.Set(color.Bold)
+	color.Green(indent(msg))
+}
 
 func DurationHumanReadable(d time.Duration) string{
 	var parts []string
