@@ -10,6 +10,7 @@ type ToDoListItem struct {
 	Id        int       `json:"id" db:"id"`
 	Do        string    `json:"do" db:"do"`
 	DoBy time.Time `json:"doBy" db:"doBy"`
+	CreatedAt time.Time `json:"createdAt" db:"createdAt"`
 }
 
 type ToDoList interface {

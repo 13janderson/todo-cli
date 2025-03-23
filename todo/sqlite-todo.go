@@ -27,9 +27,18 @@ func DefaultToDoListSqlite() (td *ToDoListSqlite) {
 	return td
 }
 
+func (td ToDoListItem) RemainingTimeFraction() float64{
+	// Fraction of the remaining time left on the task and the initial allowed time for the task
+	allowedTime := (float64) (td.DoBy.Sub(td.CreatedAt))
+	remainingTime := (float64) (td.RemainingTime())
+	return remainingTime/allowedTime
+}
+
 func (td ToDoListItem) RemainingTime() time.Duration{
 	return time.Until(td.DoBy)
 }
+
+
 
 func (td *ToDoListSqlite) openDBFile() error{
 	if _, err := os.Open(td.dbFileName); err != nil{
@@ -72,7 +81,7 @@ func (td *ToDoListSqlite) Init() error{
 
 	td.ExecLogError((fmt.Sprintf(`
 			CREATE TABLE IF NOT EXISTS %s
-			(id INTEGER PRIMARY KEY, do TEXT, doBy TIMESTAMP)
+			(id INTEGER PRIMARY KEY, do TEXT, doBy TIMESTAMP, createdAt TIMESTAMP)
 		`, td.toDoTableName)))
 		
 	return nil
@@ -92,9 +101,9 @@ func (td *ToDoListSqlite) Add(item ToDoListItem) error{
 
 	sqlInsert := (fmt.Sprintf(`
 			INSERT INTO %s
-			(do , doBy)
+			(do , doBy, createdAt)
 			VALUES
-			(:do, :doBy)
+			(:do, :doBy, DATETIME('now'))
 		`, td.toDoTableName, ))
 	res, err := td.db.NamedExec(sqlInsert, &item)
 	if err != nil{

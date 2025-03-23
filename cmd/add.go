@@ -29,7 +29,6 @@ var addCmd = &cobra.Command{
 		// Perform regex matching on days and hours arguments
 		// td add x 1h
 		timeArg := todo.GetArgString(args, 1, DEFAULT_TO_DO_TIMEUNIT)
-
 		regex := regexp.MustCompile(`^(\d+)([hd])$`)
 
 		var matchedTime = DEFAULT_TO_DO_TIME

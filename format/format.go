@@ -19,11 +19,14 @@ func RemovedMessage(msg string){
 
 func ShowToDoListItem(td todo.ToDoListItem){
 	remainingTime := td.RemainingTime()
+	remainingTimeFraction := td.RemainingTimeFraction()
 	color.Set(color.Bold)
+	// Want the colour to get progressively more red and less green until expiry
 	if remainingTime <= time.Duration(0){
-		color.Red("%s [%d] %s EXPIRED", indent(), td.Id, td.Do)
+		color.Red("%s [%d] %s EXPIRED\n", indent(), td.Id, td.Do)
 	}else{
-		color.Green("%s [%d] %s %s", indent(), td.Id, td.Do, DurationHumanReadable(remainingTime))
+		c := color.RGB(int ((1 - remainingTimeFraction)*255), int((remainingTimeFraction)*255), 0)
+		c.Printf("%s [%d] %s %s\n", indent(), td.Id, td.Do, DurationHumanReadable(remainingTime))
 	}
 }
 
