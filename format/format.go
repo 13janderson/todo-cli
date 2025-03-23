@@ -113,5 +113,4 @@ func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem){
 	for i, rtf := range remainingTimeFractions{
 		showToDoListItemByRemainingTimeFraction(tdl[i], rtf)
 	}
-
 }

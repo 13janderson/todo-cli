@@ -21,7 +21,7 @@ var lsCmd = &cobra.Command{
 		if err != nil{
 			format.ShowWarningMessage(err.Error())
 		}else{
-			format.ShowToDoListItemsNormalised(items)
+			format.ShowToDoListItems(items)
 		}
 	},
 }
