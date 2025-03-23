@@ -1,14 +1,14 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
 	"errors"
-	"github.com/fatih/color"
+	"fmt"
 	"strconv"
 	"todo/todo"
+	"todo/format"
 	"github.com/spf13/cobra"
 )
 
@@ -42,8 +42,7 @@ to quickly create a Cobra application.`,
 			}
 			
 			deleted := todo.DefaultToDoListSqlite().Remove(toDoListItem)
-			color.Set(color.Bold)
-			color.Red("%s Removed %d task(s)", indent(), deleted)
+			format.RemovedMessage(fmt.Sprintf("Removed %d task(s)", deleted))
 			return nil
 		}
 	},

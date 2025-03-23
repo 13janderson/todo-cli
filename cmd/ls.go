@@ -5,9 +5,8 @@ package cmd
 
 import (
 	"errors"
-	"time"
 	"todo/todo"
-	"github.com/fatih/color"
+	"todo/format"
 	"github.com/spf13/cobra"
 )
 
@@ -32,13 +31,7 @@ to quickly create a Cobra application.`,
 		}
 
 		for _, item := range items{
-			remainingTime := item.RemainingTime()
-			color.Set(color.Bold)
-			if remainingTime <= time.Duration(0){
-				color.Red("%s [%d] %s EXPIRED", indent(), item.Id, item.Do)
-			}else{
-				color.Green("%s [%d] %s %s", indent(), item.Id, item.Do, DurationHumanReadable(remainingTime))
-			}
+			format.ShowToDoListItem(item)
 		}
 		return nil
 
