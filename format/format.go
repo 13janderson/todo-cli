@@ -35,7 +35,7 @@ func ShowErrorMessage(msg string){
 
 func ShowSuccessMessage(msg string){
 	color.Set(color.Bold)
-	color.RGB(0, 255, 20).Print(Indent(fmt.Sprintf("Added %s", msg)))
+	color.RGB(0, 255, 20).Print(Indent(msg))
 }
 
 func DurationHumanReadable(d time.Duration) string{
@@ -107,14 +107,12 @@ func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem){
 		remainingTimeFractions = append(remainingTimeFractions, tdRemainingTime)
 	}
 
-	fmt.Println(remainingTimeFractions)
 	if max != 0 {
 		for i, rtf := range remainingTimeFractions {
 			// Normalise to 0-1 range
 			remainingTimeFractions[i] = rtf / max
 		}
 	}
-	fmt.Println(remainingTimeFractions)
 
 	// Define scaling range (avoid full red)
 	const minScale, maxScale = 0.3, 1.0

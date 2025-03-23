@@ -60,7 +60,7 @@ var addCmd = &cobra.Command{
 		if err != nil{
 			format.ShowErrorMessage(err.Error())
 		}else{
-			format.ShowSuccessMessage(td.String())
+			format.ShowSuccessMessage(fmt.Sprintf("Added %s", td.String()))
 		}
 
 	},
