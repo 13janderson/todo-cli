@@ -82,7 +82,7 @@ func showToDoListItemExpired(td todo.ToDoListItem){
 func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64 ){
 	color.Set(color.Bold)
 	remainingTime := td.RemainingTime()
-	c := color.RGB(int ((1 - remainingTimeFraction)*255), int((remainingTimeFraction)*255), 0)
+	c := color.RGB(int ((1 - math.Max(remainingTimeFraction, 0.2))*255), int(math.Max(remainingTimeFraction, 0.7) *255), 0)
 	c.Printf(Indent(fmt.Sprintf("%s %s", td.String(), DurationHumanReadable(remainingTime))))
 }
 
@@ -91,7 +91,7 @@ func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem){
 	max := -math.MaxFloat64
 	var remainingTimeFractions []float64
 	for _, td := range tdl{
-		tdRemainingTime := td.RemainingTimeFraction()
+		tdRemainingTime := td.RemainingTime().Seconds()
 		max = math.Max(tdRemainingTime, max)
 		remainingTimeFractions = append(remainingTimeFractions, tdRemainingTime)
 	}
