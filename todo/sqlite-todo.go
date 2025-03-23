@@ -51,20 +51,19 @@ func (td *ToDoListSqlite) List() error{
 	var allItems []ToDoListItem
 	sqlSelectAll := fmt.Sprintf(`
 		SELECT * FROM %s
+		ORDER BY doBy DESC
 	`, td.toDoTableName)
 
 	td.db.Select(&allItems, sqlSelectAll)
-	fmt.Println(allItems)
 
-	// Would be nice to sort these by time
+	indent := fmt.Sprintf("%*s", 4, "")
 	for _, item := range allItems{
 		remainingTime := item.RemainingTime()
 		color.Set(color.Bold)
 		if remainingTime <= time.Duration(0){
-			color.Red("\t%s\t", fmt.Sprintf("[%d] %s EXPIRED", item.Id, item.Do))
+			color.Red("%s [%d] %s EXPIRED", indent, item.Id, item.Do)
 		}else{
-			// color.Green(fmt.Sprintf("\t%s", item.String()))
-			color.HiGreen("\t%s\t", fmt.Sprintf("[%d] %s %s", item.Id, item.Do, DurationHumanReadable(remainingTime)))
+			color.Green("%s [%d] %s %s", indent, item.Id, item.Do, DurationHumanReadable(remainingTime))
 		}
 	}
 	return nil

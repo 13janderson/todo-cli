@@ -27,8 +27,8 @@ to quickly create a Cobra application.`,
 			return errors.New("this command requires at least one argument. \n proper usage: td add x ?d ?h")
 		}
 
-		days := todo.GetArg(args, 1, 0, nil)
-		hours := todo.GetArg(args, 1, 2, nil)
+		days := todo.GetArg(args, 1, 0, todo.StringToInt)
+		hours := todo.GetArg(args, 2, 2, todo.StringToInt)
 		createdAt := time.Now()
 		err := todo.DefaultToDoListSqlite().Add(todo.ToDoListItem{
 			Do:  todo.GetArgString(args, 0, "Nothing"),
