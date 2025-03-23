@@ -84,7 +84,7 @@ func (td *ToDoListSqlite) Init() error{
 }
 
 
-func (td *ToDoListSqlite) Add(item ToDoListItem) error{
+func (td *ToDoListSqlite) Add(item *ToDoListItem) error{
 
 	sqlInsert := (fmt.Sprintf(`
 			INSERT INTO %s
@@ -100,7 +100,10 @@ func (td *ToDoListSqlite) Add(item ToDoListItem) error{
 			if err != nil{
 				return err
 			}
-			return errors.New("Multiple rows created for a single insertion.")
+			return errors.New("multiple rows created for a single insertion")
+		}else{
+			insertedId, _ := res.LastInsertId()
+			item.Id = (int) (insertedId)
 		}
 	}
 	return nil

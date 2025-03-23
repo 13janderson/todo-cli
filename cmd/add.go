@@ -55,7 +55,7 @@ var addCmd = &cobra.Command{
 			CreatedAt: createdAt,
 		}
 
-		err := todo.DefaultToDoListSqlite().Add(td)
+		err := todo.DefaultToDoListSqlite().Add(&td)
 
 		if err != nil{
 			format.ShowErrorMessage(err.Error())

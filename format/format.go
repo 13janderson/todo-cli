@@ -20,7 +20,7 @@ func Indent(msg string) string {
 
 func RemovedMessage(msg string){
 	color.Set(color.Bold)
-	color.Red(msg)
+	color.Red(Indent(msg))
 }
 
 func ShowWarningMessage(msg string){
@@ -35,7 +35,7 @@ func ShowErrorMessage(msg string){
 
 func ShowSuccessMessage(msg string){
 	color.Set(color.Bold)
-	color.Green(Indent(msg))
+	color.RGB(0, 255, 20).Print(Indent(fmt.Sprintf("Added %s", msg)))
 }
 
 func DurationHumanReadable(d time.Duration) string{
@@ -82,29 +82,43 @@ func showToDoListItemExpired(td todo.ToDoListItem){
 func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64 ){
 	color.Set(color.Bold)
 	remainingTime := td.RemainingTime()
-	c := color.RGB(int ((1 - math.Max(remainingTimeFraction, 0.2))*255), int(math.Max(remainingTimeFraction, 0.7) *255), 0)
-	c.Printf(Indent(fmt.Sprintf("%s %s", td.String(), DurationHumanReadable(remainingTime))))
+	output := Indent(fmt.Sprintf("%s %s", td.String(), DurationHumanReadable(remainingTime)))
+	switch{
+		case remainingTimeFraction < 0.33:
+			color.RGB(252, 163, 8).Print(output)
+		case remainingTimeFraction < 0.66:
+			color.Yellow(output)
+		default:
+			color.RGB(0, 252, 8).Print(output)
+
+	}
 }
 
 // Similar to function above but we normalise the remaining time fractions
 func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem){
 	max := -math.MaxFloat64
 	var remainingTimeFractions []float64
-	for _, td := range tdl{
+
+	for _, td := range tdl {
 		tdRemainingTime := td.RemainingTime().Seconds()
 		max = math.Max(tdRemainingTime, max)
 		remainingTimeFractions = append(remainingTimeFractions, tdRemainingTime)
 	}
 
-	if max != 0{
-		// Normalise between 0 and 1 to use entire colour spectrum properly
-		for i, rt := range remainingTimeFractions{
+	if max != 0 {
+		for i, rt := range remainingTimeFractions {
+			// Normalise to 0-1 range
 			remainingTimeFractions[i] = rt / max
 		}
 	}
 
-	// Use remaining time fractions to display like normal
-	for i, rtf := range remainingTimeFractions{
-		showToDoListItemByRemainingTimeFraction(tdl[i], rtf)
+	// Define scaling range (avoid full red)
+	const minScale, maxScale = 0.3, 1.0
+
+	for i, rtf := range remainingTimeFractions {
+		// Scale between 0.3 and 1.0
+		scaledRtf := minScale + (rtf * (maxScale - minScale))
+
+		showToDoListItemByRemainingTimeFraction(tdl[i], scaledRtf)
 	}
 }
