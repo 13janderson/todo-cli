@@ -1,9 +1,10 @@
 package todo
 
 import (
-	"log"
-	"strconv"
 	"time"
+	"fmt"
+	"todo/format"
+	"github.com/fatih/color"
 )
 
 type ToDoListItem struct {
@@ -27,28 +28,34 @@ type ToDoList interface {
 	Complete()
 }
 
-
-func GetArgString (args []string, idx int, defaultValue string) string {
-	return GetArg(args, idx, defaultValue, Identity[string])
+func (td *ToDoListItem) String() string{
+	return fmt.Sprintf("[%d] %s by: %s", td.Id, td.Do, td.DoBy.Format(time.RFC822))
 }
 
-func GetArg[T any] (args []string, idx int, defaultValue T, convert func(string) (T, error)) T{
-	var err error
-	var arg T
-	if idx < len(args) {
-		arg, err = convert(args[idx])
-		if err != nil{
-			log.Fatal(err.Error())
-		}
-		return arg
+func (td ToDoListItem) RemainingTimeFraction() float64{
+	// Fraction of the remaining time left on the task and the initial allowed time for the task
+	allowedTime := (float64) (td.DoBy.Sub(td.CreatedAt))
+	remainingTime := (float64) (td.RemainingTime())
+	return remainingTime/allowedTime
+}
+
+func (td ToDoListItem) RemainingTime() time.Duration{
+	return time.Until(td.DoBy)
+}
+
+func (td ToDoListItem) ShowToDoListItem(){
+	remainingTime := td.RemainingTime()
+	remainingTimeFraction := td.RemainingTimeFraction()
+	color.Set(color.Bold)
+	// Want the colour to get progressively more red and less green until expiry
+	if remainingTime <= time.Duration(0){
+		color.Red(format.Indent(fmt.Sprintf("[%d] %s EXPIRED", td.Id, td.Do)))
+	}else{
+		c := color.RGB(int ((1 - remainingTimeFraction)*255), int((remainingTimeFraction)*255), 0)
+		c.Printf(format.Indent(fmt.Sprintf("%s %s", td.String(), format.DurationHumanReadable(remainingTime))))
 	}
-	return defaultValue
 }
 
-func Identity[T any](t T) (T, error ){
-	return t, nil
-}
 
-func StringToInt(s string) (int, error) {
-	return strconv.Atoi(s)
-}
+
+

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -26,18 +25,6 @@ func DefaultToDoListSqlite() (td *ToDoListSqlite) {
 	
 	return td
 }
-
-func (td ToDoListItem) RemainingTimeFraction() float64{
-	// Fraction of the remaining time left on the task and the initial allowed time for the task
-	allowedTime := (float64) (td.DoBy.Sub(td.CreatedAt))
-	remainingTime := (float64) (td.RemainingTime())
-	return remainingTime/allowedTime
-}
-
-func (td ToDoListItem) RemainingTime() time.Duration{
-	return time.Until(td.DoBy)
-}
-
 
 
 func (td *ToDoListSqlite) openDBFile() error{
@@ -103,7 +90,7 @@ func (td *ToDoListSqlite) Add(item ToDoListItem) error{
 			INSERT INTO %s
 			(do , doBy, createdAt)
 			VALUES
-			(:do, :doBy, DATETIME('now'))
+			(:do, :doBy, :createdAt)
 		`, td.toDoTableName, ))
 	res, err := td.db.NamedExec(sqlInsert, &item)
 	if err != nil{

@@ -23,7 +23,7 @@ var lsCmd = &cobra.Command{
 		}
 
 		for _, item := range items{
-			format.ShowToDoListItem(item)
+			item.ShowToDoListItem()
 		}
 
 	},
