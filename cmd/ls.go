@@ -5,8 +5,9 @@ package cmd
 
 import (
 	"errors"
+	"time"
 	"todo/todo"
-
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +26,21 @@ to quickly create a Cobra application.`,
 			return errors.New("this command does not support any arguments. \n proper usage: td ls")
 		}
 
-		return todo.DefaultToDoListSqlite().List()
+		items, err := todo.DefaultToDoListSqlite().List()
+		if err != nil{
+			return err
+		}
+
+		for _, item := range items{
+			remainingTime := item.RemainingTime()
+			color.Set(color.Bold)
+			if remainingTime <= time.Duration(0){
+				color.Red("%s [%d] %s EXPIRED", indent(), item.Id, item.Do)
+			}else{
+				color.Green("%s [%d] %s %s", indent(), item.Id, item.Do, DurationHumanReadable(remainingTime))
+			}
+		}
+		return nil
 
 	},
 }

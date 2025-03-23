@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"errors"
+	"github.com/fatih/color"
 	"strconv"
 	"todo/todo"
 	"github.com/spf13/cobra"
@@ -23,7 +24,10 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error{
 		if len(args) > 1{
-			return errors.New("this command does not support more than one argument. \n proper usage: rm x where x is either an id or a string to match with.")
+			return errors.New("this command requires atr least one argument. \n proper usage: rm x where x is either an id or a string to match with.")
+		}else if len(args) == 0{
+
+			return errors.New("this command requires at least one argument. \n proper usage: td add x ?d ?h")
 		}else{
 			arg := args[0]
 			id, err := strconv.Atoi(arg)
@@ -37,7 +41,9 @@ to quickly create a Cobra application.`,
 				toDoListItem.Do = arg
 			}
 			
-			todo.DefaultToDoListSqlite().Remove(toDoListItem)
+			deleted := todo.DefaultToDoListSqlite().Remove(toDoListItem)
+			color.Set(color.Bold)
+			color.Red("%s Removed %d task(s)", indent(), deleted)
 			return nil
 		}
 	},

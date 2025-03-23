@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"time"
-	"github.com/fatih/color"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -28,12 +27,9 @@ func DefaultToDoListSqlite() (td *ToDoListSqlite) {
 	return td
 }
 
-
-
 func (td ToDoListItem) RemainingTime() time.Duration{
 	return time.Until(td.DoBy)
 }
-
 
 func (td *ToDoListSqlite) openDBFile() error{
 	if _, err := os.Open(td.dbFileName); err != nil{
@@ -42,13 +38,13 @@ func (td *ToDoListSqlite) openDBFile() error{
 	return nil
 }
 
-func (td *ToDoListSqlite) List() error{
+func (td *ToDoListSqlite) List() ([]ToDoListItem, error){
+	var allItems []ToDoListItem
 	if dbFileOpen := td.openDBFile(); dbFileOpen != nil{
-		return errors.New("to list was not initalised.\n run td init first")
+		return allItems, errors.New("to list was not initalised.\n run td init first")
 	}
 
 	// Select all entries in DB
-	var allItems []ToDoListItem
 	sqlSelectAll := fmt.Sprintf(`
 		SELECT * FROM %s
 		ORDER BY doBy DESC
@@ -56,42 +52,10 @@ func (td *ToDoListSqlite) List() error{
 
 	td.db.Select(&allItems, sqlSelectAll)
 
-	indent := fmt.Sprintf("%*s", 4, "")
-	for _, item := range allItems{
-		remainingTime := item.RemainingTime()
-		color.Set(color.Bold)
-		if remainingTime <= time.Duration(0){
-			color.Red("%s [%d] %s EXPIRED", indent, item.Id, item.Do)
-		}else{
-			color.Green("%s [%d] %s %s", indent, item.Id, item.Do, DurationHumanReadable(remainingTime))
-		}
-	}
-	return nil
-}
-
-func DurationHumanReadable(d time.Duration) string{
-	var parts []string
-	
-	day := time.Hour * 24
-	days := int(d / day)
-	afterDays := d - time.Duration(days)*day
-	hours := int(afterDays / time.Hour)
-	afterHours := afterDays - time.Duration(time.Hour)*time.Duration(hours)
-	mins := int(afterHours / time.Minute)
-
-	if days > 0 {
-		parts = append(parts, fmt.Sprintf("%dd", days))
-	}
-	if hours > 0 {
-		parts = append(parts, fmt.Sprintf("%dh", hours))
-	}
-	if mins > 0 {
-		parts = append(parts, fmt.Sprintf("%dm", mins))
-	}
-
-	return fmt.Sprintf("%s", parts)
+	return allItems, nil
 
 }
+
 
 func (td *ToDoListSqlite) openDbConnection() {
 	db, err := sqlx.Open("sqlite3", td.dbFileName)
@@ -146,17 +110,18 @@ func (td *ToDoListSqlite) Add(item ToDoListItem) error{
 	return nil
 }
 
-func (td *ToDoListSqlite) Remove(item ToDoListItem) {
+func (td *ToDoListSqlite) Remove(item ToDoListItem) int{
 	// This function is best effort. We first try to remove entries with item.idId.
 	deleteWithId := (fmt.Sprintf(`
 			DELETE FROM %s
 			WHERE Id='%d'
-		`, td.toDoTableName, item.Id))
-
+	`, td.toDoTableName, item.Id))
+	
+	var deleted int64 
 	res := td.ExecLogError(deleteWithId)
-	if deleted, _ := res.RowsAffected(); deleted > 0{
-		fmt.Printf("Removed %d records.", deleted)
-		return
+	deleted, _ = res.RowsAffected()
+	if(deleted > 0){
+		return (int) (deleted)
 	}
 
 	// Failing that, we try to remove any items with a matching Do
@@ -166,11 +131,9 @@ func (td *ToDoListSqlite) Remove(item ToDoListItem) {
 		`, td.toDoTableName, item.Do))
 
 	res = td.ExecLogError(deleteLikeDo)
-	if deleted, _ := res.RowsAffected(); deleted > 0{
-		fmt.Printf("Removed %d records.", deleted)
-		return
-	}
+	deleted, _ = res.RowsAffected()
 
+	return (int) (deleted)
 }
 
 func (td *ToDoListSqlite) Pop() {
@@ -190,12 +153,12 @@ func (td *ToDoListSqlite) Pop() {
 			`, td.toDoTableName, maxIdRecord.Id))
 		res := td.ExecLogError(deleteMaxId)
 		if deleted, _ := res.RowsAffected(); deleted > 0{
-			fmt.Printf("Removed %d records.", deleted)
+			fmt.Printf("Removed %d records",  100)
 			return
 		}
 
 	}else if numRecords > 1{
-		log.Fatalf("Failed to determine most recent to do list item. Got %d records.", numRecords)
+		log.Fatalf("Failed to determine most recent to do list item. Got %d records", numRecords)
 	}
 
 }
