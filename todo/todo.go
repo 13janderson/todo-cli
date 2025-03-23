@@ -32,11 +32,8 @@ func (td *ToDoListItem) String() string{
 
 func (td ToDoListItem) RemainingTimeFraction() float64{
 	// Fraction of the remaining time left on the task and the initial allowed time for the task
-	// fmt.Println(td.String())
 	allowedTime := (float64) (td.DoBy.Sub(td.CreatedAt).Seconds())
-	// fmt.Println(allowedTime)
 	remainingTime := (float64) (td.RemainingTime().Seconds())
-	// fmt.Println(remainingTime)
 	return remainingTime/allowedTime
 }
 

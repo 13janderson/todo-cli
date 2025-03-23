@@ -80,7 +80,6 @@ func showToDoListItemExpired(td todo.ToDoListItem){
 }
 
 func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64 ){
-	fmt.Println(remainingTimeFraction)
 	color.Set(color.Bold)
 	remainingTime := td.RemainingTime()
 	c := color.RGB(int ((1 - remainingTimeFraction)*255), int((remainingTimeFraction)*255), 0)
@@ -97,17 +96,12 @@ func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem){
 		remainingTimeFractions = append(remainingTimeFractions, tdRemainingTime)
 	}
 
-	// fmt.println(tdl)
-	// fmt.println(remainingtimefractions)
-	
 	if max != 0{
 		// Normalise between 0 and 1 to use entire colour spectrum properly
 		for i, rt := range remainingTimeFractions{
 			remainingTimeFractions[i] = rt / max
 		}
 	}
-
-	// fmt.Println(remainingTimeFractions)
 
 	// Use remaining time fractions to display like normal
 	for i, rtf := range remainingTimeFractions{
