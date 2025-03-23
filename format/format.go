@@ -79,18 +79,20 @@ func showToDoListItemExpired(td todo.ToDoListItem){
 	color.Red(Indent(fmt.Sprintf("[%d] %s EXPIRED", td.Id, td.Do)))
 }
 
+
 func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64 ){
 	color.Set(color.Bold)
 	remainingTime := td.RemainingTime()
 	output := Indent(fmt.Sprintf("%s %s", td.String(), DurationHumanReadable(remainingTime)))
 	switch{
+		case remainingTimeFraction == 0:
+			showToDoListItemExpired(td)
 		case remainingTimeFraction < 0.33:
 			color.RGB(252, 163, 8).Print(output)
 		case remainingTimeFraction < 0.66:
 			color.Yellow(output)
 		default:
 			color.RGB(0, 252, 8).Print(output)
-
 	}
 }
 
@@ -105,20 +107,24 @@ func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem){
 		remainingTimeFractions = append(remainingTimeFractions, tdRemainingTime)
 	}
 
+	fmt.Println(remainingTimeFractions)
 	if max != 0 {
-		for i, rt := range remainingTimeFractions {
+		for i, rtf := range remainingTimeFractions {
 			// Normalise to 0-1 range
-			remainingTimeFractions[i] = rt / max
+			remainingTimeFractions[i] = rtf / max
 		}
 	}
+	fmt.Println(remainingTimeFractions)
 
 	// Define scaling range (avoid full red)
 	const minScale, maxScale = 0.3, 1.0
 
 	for i, rtf := range remainingTimeFractions {
 		// Scale between 0.3 and 1.0
-		scaledRtf := minScale + (rtf * (maxScale - minScale))
+		if rtf != 0{
+			rtf = minScale + (rtf * (maxScale - minScale))
+		}
 
-		showToDoListItemByRemainingTimeFraction(tdl[i], scaledRtf)
+		showToDoListItemByRemainingTimeFraction(tdl[i], rtf)
 	}
 }

@@ -38,7 +38,12 @@ func (td ToDoListItem) RemainingTimeFraction() float64{
 }
 
 func (td ToDoListItem) RemainingTime() time.Duration{
-	return time.Until(td.DoBy)
+	until := time.Until(td.DoBy)
+	if until < 0{
+		return time.Duration(0)
+	}else{
+		return until
+	}
 }
 
 
