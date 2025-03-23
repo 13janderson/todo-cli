@@ -24,7 +24,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error{
 		if len(args) > 1{
-			return errors.New("this command requires atr least one argument. \n proper usage: rm x where x is either an id or a string to match with.")
+			return errors.New("this command requires atr least one argument. \n proper usage: rm x where x is either an id or a string to match with")
 		}else if len(args) == 0{
 
 			return errors.New("this command requires at least one argument. \n proper usage: td add x ?d ?h")
