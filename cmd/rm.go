@@ -22,7 +22,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error{
-		if len(args) > 0{
+		if len(args) > 1{
 			return errors.New("this command does not support more than one argument. \n proper usage: rm x where x is either an id or a string to match with.")
 		}else{
 			arg := args[0]
@@ -30,7 +30,7 @@ to quickly create a Cobra application.`,
 
 			var toDoListItem todo.ToDoListItem;
 
-			// Try to parse and id from the string
+			// Try to parse an id from the string. Failing that we try to match with the Do string 
 			if err == nil{
 				toDoListItem.Id = id
 			}else{

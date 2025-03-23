@@ -153,7 +153,6 @@ func (td *ToDoListSqlite) Remove(item ToDoListItem) {
 			WHERE Id='%d'
 		`, td.toDoTableName, item.Id))
 
-	fmt.Println(deleteWithId)
 	res := td.ExecLogError(deleteWithId)
 	if deleted, _ := res.RowsAffected(); deleted > 0{
 		fmt.Printf("Removed %d records.", deleted)
@@ -166,7 +165,6 @@ func (td *ToDoListSqlite) Remove(item ToDoListItem) {
 			WHERE Do LIKE '%%%s'
 		`, td.toDoTableName, item.Do))
 
-	fmt.Println(deleteWithId)
 	res = td.ExecLogError(deleteLikeDo)
 	if deleted, _ := res.RowsAffected(); deleted > 0{
 		fmt.Printf("Removed %d records.", deleted)
