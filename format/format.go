@@ -2,21 +2,34 @@ package format
 
 import (
 	"fmt"
-	"strings"
-	"todo/todo"
 	"math"
-	"github.com/fatih/color"
+	"strings"
 	"time"
+	"todo/todo"
+
+	"github.com/fatih/color"
 )
 
 func Indent(msg string) string {
 	var ret string
 	lines := strings.Split(msg, "\n")
 	for _, l := range lines{
-		ret += fmt.Sprintf("%*s %s\n", 4, "", l)
+		ret += formatIndent(l) + "\n"
 	}
 	return ret
 }
+
+func formatIndent(msg string) string{
+	return fmt.Sprintf("%*s %s", 4, "", msg)
+}
+
+// func formatIndentRecursive(msg string, indentCount int) string{
+// 	if indentCount <= 0{
+// 		return msg 
+// 	}
+// 	return formatIndent(formatIndentRecursive(msg, indentCount -1))
+// }
+//
 
 func RemovedMessage(msg string){
 	color.Set(color.Bold)
@@ -31,6 +44,15 @@ func ShowWarningMessage(msg string){
 func ShowErrorMessage(msg string){
 	color.Set(color.Bold)
 	color.Red(Indent(msg))
+}
+
+func ShowDirectoryMessage(directory string){
+	ShowInformationMessage(fmt.Sprintf(directory))
+}
+
+func ShowInformationMessage(msg string){
+	color.Set(color.Bold)
+	color.RGB(255, 255, 255).Print(Indent(msg))
 }
 
 func ShowSuccessMessage(msg string){
