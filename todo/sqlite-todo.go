@@ -2,11 +2,12 @@ package todo
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
+	"errors"
 	"log"
 	"os"
 	"github.com/jmoiron/sqlx"
+	"path/filepath"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -15,6 +16,16 @@ type ToDoListSqlite struct {
 	db            *sqlx.DB
 	toDoTableName string
 }
+
+func DefaultToDoListSqliteInDirectory(directory string) (td *ToDoListSqlite) {
+	td = &ToDoListSqlite{
+		dbFileName:    filepath.Join(directory, ".todo.db"),
+		toDoTableName: "todo",
+	}
+	td.openDbConnection()
+	return td
+}
+
 
 func DefaultToDoListSqlite() (td *ToDoListSqlite) {
 	td = &ToDoListSqlite{
