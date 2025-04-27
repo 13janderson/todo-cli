@@ -38,7 +38,7 @@ func ShowErrorMessage(msg string){
 }
 
 func ShowDirectoryMessage(directory string){
-	ShowInformationMessage(fmt.Sprintf(directory))
+	ShowInformationMessage((fmt.Sprintf("/%s", directory)))
 }
 
 func ShowInformationMessage(msg string){

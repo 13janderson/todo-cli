@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"os"
-	"fmt"
 	"todo/format"
 	"todo/todo"
 	"path/filepath"
@@ -23,7 +22,7 @@ var lsCmd = &cobra.Command{
 
 		recursive, _ := cmd.Flags().GetBool("recursive")
 		if recursive{
-			showListInDirectoryRecursive(0, "")
+			showListInDirectoryRecursive(0, ".")
 		}else{
 			showList()
 		}
@@ -39,6 +38,9 @@ func showListInDirectoryRecursive(currentDepth int, directory string){
 	}
 
 	dirs, _ := os.ReadDir(directory)
+	// if len(dirs) == 0{
+	// 	return
+	// }
 	for _, dir := range dirs{
 		if dir.IsDir(){
 			dirPath := filepath.Join(directory, dir.Name())
@@ -50,7 +52,7 @@ func showListInDirectoryRecursive(currentDepth int, directory string){
 func showListDirectory(directory string){
 	items, err := todo.DefaultToDoListSqliteInDirectory(directory).List()
 	if err == nil{
-		format.ShowDirectoryMessage(fmt.Sprintf("/%s", directory))
+		format.ShowDirectoryMessage(directory)
 		format.ShowToDoListItemsNormalised(items)
 	}
 }
