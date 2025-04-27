@@ -4,12 +4,12 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"regexp"
-	"strconv"
 	"fmt"
+	"strconv"
 	"time"
-	"todo/todo"
 	"todo/format"
+	"todo/todo"
+
 	"github.com/spf13/cobra"
 )
 
@@ -25,21 +25,19 @@ var addCmd = &cobra.Command{
 			format.ShowErrorMessage("this command requires at least one argument. \n proper usage: td add x ?(d/h). For example td add 'have a pint' 1d to give yourself a day to have a pint")
 		}
 
-		// Perform regex matching on days and hours arguments
-		// td add x 1h
-		timeArg := GetArgString(args, 1, DEFAULT_TO_DO_TIMEUNIT)
-		regex := regexp.MustCompile(`^(\d+)([hd])$`)
-
-		var matchedTime = DEFAULT_TO_DO_TIME
-		var matchedUnit = DEFAULT_TO_DO_UNIT
-		if regex.MatchString(timeArg){
-			groups := regex.FindStringSubmatch(timeArg)
-			matchedTime = groups[1]
-			matchedUnit = groups[2]
-		}else{
-			format.ShowWarningMessage(fmt.Sprintf("Failed to determine intended duration, using default %s", matchedTime))
+		do, err := GetArgString(args, 0)
+		if err != nil{
+			// Fatal if we cannot resolve a string from the first argument 
+			format.ShowErrorMessage("could not parse string for toDo task")
+			return
 		}
+
 		createdAt := time.Now()
+		matchedTime, matchedUnit, err := GetArgTimeUnitString(args, 1)
+		if err != nil{
+			format.ShowWarningMessage(fmt.Sprintf("failed to parse a time from command, using default %s", DEFAULT_TO_DO_TIMEUNIT))
+			matchedTime, matchedUnit = DEFAULT_TO_DO_TIME, DEFAULT_TO_DO_UNIT
+		}
 
 		var doBy time.Time;
 		intTime, _ := strconv.Atoi(matchedTime)
@@ -50,12 +48,12 @@ var addCmd = &cobra.Command{
 		}
 
 		td := todo.ToDoListItem{
-			Do:  GetArgString(args, 0, "Nothing"),
+			Do: do, 
 			DoBy: doBy,
 			CreatedAt: createdAt,
 		}
 
-		err := todo.DefaultToDoListSqlite().Add(&td)
+		err = todo.DefaultToDoListSqlite().Add(&td)
 
 		if err != nil{
 			format.ShowErrorMessage(err.Error())

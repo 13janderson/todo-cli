@@ -23,7 +23,7 @@ var lsCmd = &cobra.Command{
 
 		recursive, _ := cmd.Flags().GetBool("recursive")
 		if recursive{
-			showListInDirectoryRecursive(0, ".")
+			showListInDirectoryRecursive(0, "")
 		}else{
 			showList()
 		}

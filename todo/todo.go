@@ -23,6 +23,8 @@ type ToDoList interface {
 	// Removes most recent to do added
 	Pop()
 
+	SelectWithId(int) ([]ToDoListItem, error)
+
 	Complete()
 }
 

@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 	"todo/todo"
-
 	"github.com/fatih/color"
 )
 
@@ -22,14 +21,6 @@ func Indent(msg string) string {
 func formatIndent(msg string) string{
 	return fmt.Sprintf("%*s %s", 4, "", msg)
 }
-
-// func formatIndentRecursive(msg string, indentCount int) string{
-// 	if indentCount <= 0{
-// 		return msg 
-// 	}
-// 	return formatIndent(formatIndentRecursive(msg, indentCount -1))
-// }
-//
 
 func RemovedMessage(msg string){
 	color.Set(color.Bold)

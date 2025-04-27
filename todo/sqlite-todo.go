@@ -2,12 +2,12 @@ package todo
 
 import (
 	"database/sql"
-	"fmt"
 	"errors"
+	"fmt"
 	"log"
 	"os"
-	"github.com/jmoiron/sqlx"
 	"path/filepath"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -120,6 +120,18 @@ func (td *ToDoListSqlite) Add(item *ToDoListItem) error{
 	return nil
 }
 
+func (td *ToDoListSqlite) SelectWithId(id int) ([]ToDoListItem, error){
+	var itemsWithId []ToDoListItem
+
+	selectWithId := (fmt.Sprintf(`
+		SELECT * FROM %s 
+		WHERE id=%d
+	`, td.toDoTableName, id))
+
+	err := td.db.Select(&itemsWithId, selectWithId)
+	return itemsWithId, err
+}
+
 func (td *ToDoListSqlite) Remove(item ToDoListItem) int{
 	// This function is best effort. We first try to remove entries with item.idId.
 	deleteWithId := (fmt.Sprintf(`
@@ -168,9 +180,19 @@ func (td *ToDoListSqlite) Pop() {
 		}
 
 	}else if numRecords > 1{
-		log.Fatalf("Failed to determine most recent to do list item. Got %d records", numRecords)
+		log.Fatalf("failed to determine most recent to do list item. Got %d records", numRecords)
 	}
+}
 
+func (td *ToDoListSqlite) Extend(item ToDoListItem) error {
+	updateWithId := (fmt.Sprintf(`
+		UPDATE %s SET doBy=:doBy
+		WHERE id=:id
+	`, td.toDoTableName))
+
+	fmt.Println(item.String())
+	_ , err := td.db.NamedExec(updateWithId, &item)
+	return err
 }
 
 func (td *ToDoListSqlite) Complete(item ToDoListItem) {

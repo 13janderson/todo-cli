@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
 	"todo/todo"
 	"todo/format"
 	"github.com/spf13/cobra"
@@ -20,16 +19,15 @@ var rmCmd = &cobra.Command{
 		}else if len(args) == 0{
 			format.ShowErrorMessage("this command requires at least one argument. \n proper usage: td rm x")
 		}else{
-			arg := args[0]
-			id, err := strconv.Atoi(arg)
+			id, err := GetArgInt(args, 0)
 
 			var toDoListItem todo.ToDoListItem;
 
-			// Try to parse an id from the string. Failing that we try to match with the Do string 
+			// Try to parse an id from the string. Failing that we try to match with the string argument
 			if err == nil{
 				toDoListItem.Id = id
 			}else{
-				toDoListItem.Do = arg
+				toDoListItem.Do, _ = GetArgString(args, 0)
 			}
 			
 			deleted := todo.DefaultToDoListSqlite().Remove(toDoListItem)
