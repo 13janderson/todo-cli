@@ -190,7 +190,7 @@ func (td *ToDoListSqlite) Extend(item ToDoListItem) error {
 		WHERE id=:id
 	`, td.toDoTableName))
 
-	_ , err := td.db.NamedExec(updateWithId, &item)
+	_, err := td.db.NamedExec(updateWithId, &item)
 	return err
 }
 

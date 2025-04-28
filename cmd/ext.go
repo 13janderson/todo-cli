@@ -29,10 +29,7 @@ var extCmd= &cobra.Command{
 				return
 			}
 
-			var toDoListItem todo.ToDoListItem;
 
-			// Try to parse an id from the string. Failing that we try to match with the Do string 
-			toDoListItem.Id = id
 			
 			// Search list for item with id
 			itemsWithId, err := todo.DefaultToDoListSqlite().SelectWithId(id)
@@ -50,7 +47,8 @@ var extCmd= &cobra.Command{
 				return
 			} 
 
-			doBy := itemsWithId[0].DoBy
+			toDoListItem := itemsWithId[0]
+			doBy := toDoListItem.DoBy
 			// If the item is currently expired, take the extension of date from now
 			now := time.Now()
 			if doBy.Before(now){
