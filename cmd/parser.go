@@ -18,14 +18,14 @@ func NewParser(args []string) Parser{
 	}
 }
 
+// Returns the result of converting the argument args[idx] to a String
 func (p *Parser) GetArgString(idx int) (string, error){
-	args := p.args
-	return getArg(args, idx, identity[string])
+	return getArg(p.args, idx, identity[string])
 }
 
+// Returns the result of converting the argument args[idx] to an integer
 func (p *Parser) GetArgInt(idx int) (int, error){
-	args := p.args
-	return getArg(args, idx, stringToInt)
+	return getArg(p.args, idx, stringToInt)
 }
 
 // Takes a list of stirng arguments, an index, and a function to convert strings to the type T
@@ -61,7 +61,7 @@ func (p *Parser) GetArgDefaultInt(idx int, defaultValue int) (int, error){
 
 // TODO: add a default function for this conversion
 // Probably need a struct for this to make use of existing generic functions
-func (p *Parser) GetArgTimeUnitString(idx int) (time string , unit string , e error){
+func (p *Parser) GetArgTimeUnitString(idx int) (time string ,unit string , e error){
 	// Perform regex matching on days and hours arguments
 	timeArg, _ := p.GetArgString(idx)
 	regex := regexp.MustCompile(`^(\d+)([hd])$`)
@@ -86,5 +86,3 @@ func stringToInt(s string) (int, error) {
 	return strconv.Atoi(s)
 }
   
-
-
