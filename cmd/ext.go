@@ -20,16 +20,15 @@ const DEFAULT_EXT_TIMEUNIT = DEFAULT_EXT_TIME + DEFAULT_EXT_UNIT
 var extCmd= &cobra.Command{
 	Use:   "ext",
 	Run: func(cmd *cobra.Command, args []string) {
+		parser := NewParser(args)
 		if len(args) != 2{
 			format.ShowErrorMessage("this command requires exactly 2 arguments. \n proper usage: td ext x ?(d/h)")
 		}else{
-			id, err := GetArgInt(args, 0)
+			id, err := parser.GetArgInt(0)
 			if err != nil{
 				format.ShowErrorMessage("could not parse id for toDo task")
 				return
 			}
-
-
 			
 			// Search list for item with id
 			itemsWithId, err := todo.DefaultToDoListSqlite().SelectWithId(id)
@@ -54,7 +53,7 @@ var extCmd= &cobra.Command{
 			if doBy.Before(now){
 				doBy = now
 			}
-			matchedTime, matchedUnit, err := GetArgTimeUnitString(args, 1)
+			matchedTime, matchedUnit, err := parser.GetArgTimeUnitString(1)
 			if err != nil{
 				format.ShowWarningMessage(fmt.Sprintf("failed to parse a time from command, using default %s", DEFAULT_EXT_TIMEUNIT))
 				matchedTime, matchedUnit = DEFAULT_EXT_TIME, DEFAULT_EXT_UNIT

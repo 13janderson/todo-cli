@@ -12,6 +12,12 @@ type Parser struct{
 	args []string
 }
 
+func NewParser(args []string) Parser{
+	return Parser{
+		args,
+	}
+}
+
 func (p *Parser) GetArgString(idx int) (string, error){
 	args := p.args
 	return getArg(args, idx, identity[string])
@@ -54,6 +60,7 @@ func (p *Parser) GetArgDefaultInt(idx int, defaultValue int) (int, error){
 }
 
 // TODO: add a default function for this conversion
+// Probably need a struct for this to make use of existing generic functions
 func (p *Parser) GetArgTimeUnitString(idx int) (time string , unit string , e error){
 	// Perform regex matching on days and hours arguments
 	timeArg, _ := p.GetArgString(idx)

@@ -14,12 +14,13 @@ import (
 var rmCmd = &cobra.Command{
 	Use:   "rm",
 	Run: func(cmd *cobra.Command, args []string) {
+		parser := NewParser(args)
 		if len(args) > 1{
 			format.ShowErrorMessage("this command cannot take more than one argument. \n proper usage: rm x where x is either an id or a string to match with")
 		}else if len(args) == 0{
 			format.ShowErrorMessage("this command requires at least one argument. \n proper usage: td rm x")
 		}else{
-			id, err := GetArgInt(args, 0)
+			id, err := parser.GetArgInt(0)
 
 			var toDoListItem todo.ToDoListItem;
 
@@ -27,7 +28,7 @@ var rmCmd = &cobra.Command{
 			if err == nil{
 				toDoListItem.Id = id
 			}else{
-				toDoListItem.Do, _ = GetArgString(args, 0)
+				toDoListItem.Do, _ = parser.GetArgString(0)
 			}
 			
 			deleted := todo.DefaultToDoListSqlite().Remove(toDoListItem)

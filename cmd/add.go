@@ -24,8 +24,9 @@ var addCmd = &cobra.Command{
 		if len(args) == 0{
 			format.ShowErrorMessage("this command requires at least one argument. \n proper usage: td add x ?(d/h). For example td add 'have a pint' 1d to give yourself a day to have a pint")
 		}
+		parser := NewParser(args)
 
-		do, err := GetArgString(args, 0)
+		do, err := parser.GetArgString(0)
 		if err != nil{
 			// Fatal if we cannot resolve a string from the first argument 
 			format.ShowErrorMessage("could not parse string for toDo task")
@@ -33,7 +34,7 @@ var addCmd = &cobra.Command{
 		}
 
 		createdAt := time.Now()
-		matchedTime, matchedUnit, err := GetArgTimeUnitString(args, 1)
+		matchedTime, matchedUnit, err := parser.GetArgTimeUnitString(1)
 		if err != nil{
 			format.ShowWarningMessage(fmt.Sprintf("failed to parse a time from command, using default %s", DEFAULT_TO_DO_TIMEUNIT))
 			matchedTime, matchedUnit = DEFAULT_TO_DO_TIME, DEFAULT_TO_DO_UNIT
