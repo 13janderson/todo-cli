@@ -5,16 +5,27 @@ import (
 	"strconv"
 	"fmt"
 	"regexp"
+	"github.com/spf13/cobra"
 )
 
 // Wrapper around a list string arguments
 type Parser struct{
 	args []string
+	cmd *cobra.Command
 }
 
 func NewParser(args []string) Parser{
 	return Parser{
 		args,
+		nil,
+	}
+}
+
+func NewParserWithCmd(args []string, cmd *cobra.Command) Parser{
+	return Parser{
+		args,
+		// What do we want to do with the cmd?
+		cmd,
 	}
 }
 

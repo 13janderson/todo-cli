@@ -11,8 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// lsCmd represents the ls command
-// Currently we are just listing under the current directory, what we want is to call this function recursively with a maximum depth
 var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Run: func(cmd *cobra.Command, args []string) {
