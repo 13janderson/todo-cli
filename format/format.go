@@ -101,11 +101,11 @@ func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTime
 		case remainingTimeFraction == 0:
 			showToDoListItemExpired(td)
 		case remainingTimeFraction < 0.33:
-			color.RGB(252, 163, 8).Print(output)
+			color.RGB(100, 65, 0).Print(output)
 		case remainingTimeFraction < 0.66:
-			color.Yellow(output)
+			color.RGB(255, 255, 0).Print(output)
 		default:
-			color.RGB(0, 252, 8).Print(output)
+			color.RGB(0, 255, 0).Print(output)
 	}
 }
 

@@ -51,7 +51,7 @@ func showListDirectory(directory string){
 	items, err := todo.DefaultToDoListSqliteInDirectory(directory).List()
 	if err == nil{
 		format.ShowDirectoryMessage(directory)
-		format.ShowToDoListItemsNormalised(items)
+		format.ShowToDoListItems(items)
 	}
 }
 
@@ -61,7 +61,7 @@ func showList() {
 	if err != nil{
 		format.ShowWarningMessage(err.Error())
 	}else{
-		format.ShowToDoListItemsNormalised(items)
+		format.ShowToDoListItems(items)
 	}
 }
 

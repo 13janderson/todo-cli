@@ -16,7 +16,7 @@ var rmCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		parser := NewParser(args)
 		if len(args) > 1{
-			format.ShowErrorMessage("this command cannot take more than one argument. \n proper usage: rm x where x is either an id or a string to match with")
+			format.ShowErrorMessage("this command cannot take more than one argument. \n proper usage: rm x where x is either an id or a string pattern to match with")
 		}else if len(args) == 0{
 			format.ShowErrorMessage("this command requires at least one argument. \n proper usage: td rm x")
 		}else{
