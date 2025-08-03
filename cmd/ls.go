@@ -5,12 +5,16 @@ package cmd
 
 import (
 	"errors"
-	"github.com/spf13/cobra"
+	"fmt"
 	"os"
 	"path/filepath"
 	"todo/format"
 	"todo/todo"
+
+	"github.com/spf13/cobra"
 )
+
+const MAX_DEPTH = 3
 
 var lsCmd = NewRecursiveCommand(Recursive{
 	cmd: &cobra.Command{
@@ -22,11 +26,10 @@ var lsCmd = NewRecursiveCommand(Recursive{
 		}
 		return nil
 	},
-	recursive: func() { showListInDirectoryRecursive(0, ".") },
-	normal:    func() { showList() },
+	recursive:           func() { showListInDirectoryRecursive(0, ".") },
+	normal:              func() { showList() },
+	recursiveFlagString: fmt.Sprintf("recursive listing with max depth of %d.", MAX_DEPTH),
 })
-
-const MAX_DEPTH = 3
 
 func showListInDirectoryRecursive(currentDepth int, directory string) {
 
@@ -72,5 +75,4 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	lsCmd.PersistentFlags().BoolP("recursive", "r", false, "Recursive listing with max depth of 5.")
 }
