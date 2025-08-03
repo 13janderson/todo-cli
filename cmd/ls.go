@@ -4,63 +4,59 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
+	"github.com/spf13/cobra"
 	"os"
+	"path/filepath"
 	"todo/format"
 	"todo/todo"
-	"path/filepath"
-	"github.com/spf13/cobra"
 )
 
-var lsCmd = &cobra.Command{
-	Use:   "ls",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			format.ShowErrorMessage("this command does not support any arguments. \n proper usage: td ls")
-		}
-
-		recursive, _ := cmd.Flags().GetBool("recursive")
-		if recursive{
-			showListInDirectoryRecursive(0, ".")
-		}else{
-			showList()
-		}
+var lsCmd = NewRecursiveCommand(Recursive{
+	cmd: &cobra.Command{
+		Use: "ls",
 	},
-}
+	pre: func(args ...string) error {
+		if len(args) > 0 {
+			return errors.New("this command does not support any arguments. \n proper usage: td ls")
+		}
+		return nil
+	},
+	recursive: func() { showListInDirectoryRecursive(0, ".") },
+	normal:    func() { showList() },
+})
 
 const MAX_DEPTH = 3
-func showListInDirectoryRecursive(currentDepth int, directory string){
+
+func showListInDirectoryRecursive(currentDepth int, directory string) {
 
 	showListDirectory(directory)
-	if currentDepth == MAX_DEPTH{
+	if currentDepth == MAX_DEPTH {
 		return
 	}
 
 	dirs, _ := os.ReadDir(directory)
-	// if len(dirs) == 0{
-	// 	return
-	// }
-	for _, dir := range dirs{
-		if dir.IsDir(){
+	for _, dir := range dirs {
+		if dir.IsDir() {
 			dirPath := filepath.Join(directory, dir.Name())
 			showListInDirectoryRecursive(currentDepth+1, dirPath)
 		}
 	}
 }
 
-func showListDirectory(directory string){
+func showListDirectory(directory string) {
 	items, err := todo.DefaultToDoListSqliteInDirectory(directory).List()
-	if err == nil{
+	if err == nil {
 		format.ShowDirectoryMessage(directory)
 		format.ShowToDoListItems(items)
 	}
 }
 
-
 func showList() {
 	items, err := todo.DefaultToDoListSqlite().List()
-	if err != nil{
+	if err != nil {
 		format.ShowWarningMessage(err.Error())
-	}else{
+	} else {
 		format.ShowToDoListItems(items)
 	}
 }
