@@ -5,36 +5,42 @@ import (
 	"todo/format"
 )
 
-// If something satisfies this interface then we can construct a
-// recursive command for it.
-type Recursive struct {
-	cmd                 *cobra.Command
-	pre                 func(args ...string) error
-	normal              func()
-	recursive           func()
+type ToDoCommand struct {
+	cmd *cobra.Command
+	pre func(args ...string) error
+	// Normal verison of the command
+	normal func(args ...string)
+	// Recursive version of the command
+	recursive func(args ...string)
+	// Help displayed for recursive flag
 	recursiveFlagString string
 }
 
-func NewRecursiveCommand(rec Recursive, args ...any) *cobra.Command {
+const RECURSIVE_FLAG = "recursive"
+
+func NewToDoCommand(rec ToDoCommand) *cobra.Command {
 	var cmd = rec.cmd
 	var recursiveFlagString = "recursively run this command"
 	if rec.recursiveFlagString != "" {
 		recursiveFlagString = rec.recursiveFlagString
 	}
-	cmd.PersistentFlags().BoolP("recursive", "r", false, recursiveFlagString)
+
+	if rec.recursive != nil {
+		cmd.PersistentFlags().BoolP(RECURSIVE_FLAG, "r", false, recursiveFlagString)
+	}
+
 	cmd.Run = func(cmd *cobra.Command, args []string) {
 		var err = rec.pre()
 		if err != nil {
 			format.ShowErrorMessage(err.Error())
 		}
-		recursive, _ := cmd.Flags().GetBool("recursive")
+		recursive, _ := cmd.Flags().GetBool(RECURSIVE_FLAG)
 		if recursive {
-			rec.recursive()
+			rec.recursive(args...)
 		} else {
-			rec.normal()
+			rec.normal(args...)
 		}
 
 	}
 	return rec.cmd
-
 }

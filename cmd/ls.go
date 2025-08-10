@@ -16,7 +16,7 @@ import (
 
 const MAX_DEPTH = 3
 
-var lsCmd = NewRecursiveCommand(Recursive{
+var lsCmd = NewToDoCommand(ToDoCommand{
 	cmd: &cobra.Command{
 		Use: "ls",
 	},
