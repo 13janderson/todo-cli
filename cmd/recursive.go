@@ -37,9 +37,10 @@ func NewToDoCommand(toDoCommand ToDoCommand) *cobra.Command {
 	}
 
 	cmd.Run = func(cmd *cobra.Command, args []string) {
-		var err = toDoCommand.pre()
+		var err = toDoCommand.pre(args...)
 		if err != nil {
 			format.ShowErrorMessage(err.Error())
+			return
 		}
 		recursive, _ := cmd.Flags().GetBool(RECURSIVE_FLAG)
 		if recursive {
