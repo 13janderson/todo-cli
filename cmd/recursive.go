@@ -14,9 +14,10 @@ const MAX_DEPTH = 3
 type ToDoCommand struct {
 	cmd *cobra.Command
 	pre func(args ...string) error
-	// Normal verison of the command
-	run func(args ...string)
-	// Recursive version of the command
+	// What to run for each invocation of this command, this is ran recursively
+	// if recursive is passed as true
+	run func(recursive bool, args ...string)
+	// Whether this command supports recursive use over directories
 	recursive bool
 	// Help displayed for recursive flag
 	recursiveFlagString string
@@ -48,7 +49,7 @@ func NewToDoCommand(toDoCommand ToDoCommand) *cobra.Command {
 				args: args,
 			}, 0)
 		} else {
-			toDoCommand.run(args...)
+			toDoCommand.run(false, args...)
 		}
 
 	}
@@ -56,18 +57,18 @@ func NewToDoCommand(toDoCommand ToDoCommand) *cobra.Command {
 }
 
 type FnArgs struct {
-	fn   func(args ...string)
+	fn   func(recursive bool, args ...string)
 	args []string
 }
 
-func (fnArgs FnArgs) Call() {
-	fnArgs.fn(fnArgs.args...)
+func (fnArgs FnArgs) Call(recursive bool) {
+	fnArgs.fn(recursive, fnArgs.args...)
 }
 
 func RunRecursive(fnArgs FnArgs, depth int) {
 	// fmt.Printf("depth: %d", depth)
 	// Call the function
-	fnArgs.Call()
+	fnArgs.Call(true)
 
 	if depth == MAX_DEPTH {
 		// fmt.Printf("RETURNING")

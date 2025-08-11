@@ -30,8 +30,7 @@ var addCmd = NewToDoCommand(
 			return nil
 		},
 		recursive: false,
-
-		run: func(args ...string) {
+		run: func(_ bool, args ...string) {
 			parser := NewParser(args)
 
 			do, err := parser.GetArgString(0)
