@@ -5,32 +5,32 @@ package cmd
 
 import (
 	"fmt"
-	"todo/todo"
-	"todo/format"
 	"github.com/spf13/cobra"
+	"todo/format"
+	"todo/todo"
 )
 
 // rmCmd represents the rm command
 var rmCmd = &cobra.Command{
-	Use:   "rm",
+	Use: "rm",
 	Run: func(cmd *cobra.Command, args []string) {
 		parser := NewParser(args)
-		if len(args) > 1{
+		if len(args) > 1 {
 			format.ShowErrorMessage("this command cannot take more than one argument. \n proper usage: rm x where x is either an id or a string pattern to match with")
-		}else if len(args) == 0{
+		} else if len(args) == 0 {
 			format.ShowErrorMessage("this command requires at least one argument. \n proper usage: td rm x")
-		}else{
+		} else {
 			id, err := parser.GetArgInt(0)
 
-			var toDoListItem todo.ToDoListItem;
+			var toDoListItem todo.ToDoListItem
 
 			// Try to parse an id from the string. Failing that we try to match with the string argument
-			if err == nil{
+			if err == nil {
 				toDoListItem.Id = id
-			}else{
+			} else {
 				toDoListItem.Do, _ = parser.GetArgString(0)
 			}
-			
+
 			deleted := todo.DefaultToDoListSqlite().Remove(toDoListItem)
 			format.RemovedMessage(fmt.Sprintf("Removed %d task(s)", deleted))
 		}

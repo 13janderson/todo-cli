@@ -6,15 +6,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"todo/format"
 	"todo/todo"
 
 	"github.com/spf13/cobra"
 )
-
-const MAX_DEPTH = 3
 
 var lsCmd = NewToDoCommand(ToDoCommand{
 	cmd: &cobra.Command{
@@ -26,40 +22,20 @@ var lsCmd = NewToDoCommand(ToDoCommand{
 		}
 		return nil
 	},
-	recursive:           func() { showListInDirectoryRecursive(0, ".") },
-	normal:              func() { showList() },
+	run:                 func(_ ...string) { showList(false) },
+	recursive:           true,
 	recursiveFlagString: fmt.Sprintf("recursive listing with max depth of %d.", MAX_DEPTH),
 })
 
-func showListInDirectoryRecursive(currentDepth int, directory string) {
-
-	showListDirectory(directory)
-	if currentDepth == MAX_DEPTH {
-		return
-	}
-
-	dirs, _ := os.ReadDir(directory)
-	for _, dir := range dirs {
-		if dir.IsDir() {
-			dirPath := filepath.Join(directory, dir.Name())
-			showListInDirectoryRecursive(currentDepth+1, dirPath)
-		}
-	}
-}
-
-func showListDirectory(directory string) {
-	items, err := todo.DefaultToDoListSqliteInDirectory(directory).List()
-	if err == nil {
-		format.ShowDirectoryMessage(directory)
-		format.ShowToDoListItems(items)
-	}
-}
-
-func showList() {
-	items, err := todo.DefaultToDoListSqlite().List()
+func showList(showErrors bool) {
+	items, err := todo.DefaultToDoListSqliteCwd().List()
 	if err != nil {
-		format.ShowWarningMessage(err.Error())
+		if showErrors {
+			format.ShowWarningMessage(err.Error())
+		}
+
 	} else {
+		format.ShowCwdMessage()
 		format.ShowToDoListItems(items)
 	}
 }
