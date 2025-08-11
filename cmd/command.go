@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	// "fmt"
+	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
 	"todo/format"
-
-	"github.com/spf13/cobra"
 )
 
 const MAX_DEPTH = 3
@@ -42,14 +40,14 @@ func NewToDoCommand(toDoCommand ToDoCommand) *cobra.Command {
 			format.ShowErrorMessage(err.Error())
 			return
 		}
-		recursive, _ := cmd.Flags().GetBool(RECURSIVE_FLAG)
+		recursive, err := cmd.Flags().GetBool(RECURSIVE_FLAG)
 		if recursive {
 			// Recursively run the command
 			RunRecursive(FnArgs{
 				fn:   toDoCommand.run,
 				args: args,
 			}, 0)
-		} else {
+		} else if !recursive || err != nil {
 			toDoCommand.run(false, args...)
 		}
 
@@ -72,7 +70,6 @@ func RunRecursive(fnArgs FnArgs, depth int) {
 	fnArgs.Call(true)
 
 	if depth == MAX_DEPTH {
-		// fmt.Printf("RETURNING")
 		return
 	}
 
