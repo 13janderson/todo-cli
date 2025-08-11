@@ -6,14 +6,22 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
+	"strings"
 	"todo/format"
 	"todo/todo"
+
+	"github.com/spf13/cobra"
 )
 
 var rmCmd = NewToDoCommand(ToDoCommand{
 	cmd: &cobra.Command{
 		Use: "rm",
+		Example: strings.Join([]string{
+			"td rm foo removes all entries matching foo",
+			"td rm 1 removes all entries with id 1",
+			"td rm removes ALL entries",
+			"td rm -r removes ALL entries RECURSIVELY",
+		}, "\n"),
 	},
 	recursive: true,
 	pre: func(args ...string) error {

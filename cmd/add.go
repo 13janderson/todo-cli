@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 	"todo/format"
 	"todo/todo"
@@ -22,6 +23,11 @@ var addCmd = NewToDoCommand(
 	ToDoCommand{
 		cmd: &cobra.Command{
 			Use: "add",
+			Example: strings.Join([]string{
+				"td add foo adds a new entry called foo with the default duration",
+				"td add bar 1h adds a new entry called bar with a duration of 1 hour",
+				"td add bar 2d adds a new entry called bar with a duration of 2 days",
+			}, "\n"),
 		},
 		pre: func(args ...string) error {
 			if len(args) == 0 {
