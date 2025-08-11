@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
 	"path/filepath"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type ToDoListSqlite struct {
@@ -26,6 +26,10 @@ func DefaultToDoListSqliteInDirectory(directory string) (td *ToDoListSqlite) {
 	return td
 }
 
+func DefaultToDoListSqliteCwd() (td *ToDoListSqlite) {
+	cwd, _ := os.Getwd()
+	return DefaultToDoListSqliteInDirectory(cwd)
+}
 
 func DefaultToDoListSqlite() (td *ToDoListSqlite) {
 	td = &ToDoListSqlite{
@@ -33,21 +37,20 @@ func DefaultToDoListSqlite() (td *ToDoListSqlite) {
 		toDoTableName: "todo",
 	}
 	td.openDbConnection()
-	
+
 	return td
 }
 
-
-func (td *ToDoListSqlite) openDBFile() error{
-	if _, err := os.Open(td.dbFileName); err != nil{
+func (td *ToDoListSqlite) openDBFile() error {
+	if _, err := os.Open(td.dbFileName); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (td *ToDoListSqlite) List() ([]ToDoListItem, error){
+func (td *ToDoListSqlite) List() ([]ToDoListItem, error) {
 	var allItems []ToDoListItem
-	if dbFileOpen := td.openDBFile(); dbFileOpen != nil{
+	if dbFileOpen := td.openDBFile(); dbFileOpen != nil {
 		return allItems, errors.New("to list was not initalised.\nrun td init first")
 	}
 
@@ -63,17 +66,16 @@ func (td *ToDoListSqlite) List() ([]ToDoListItem, error){
 
 }
 
-
 func (td *ToDoListSqlite) openDbConnection() {
 	db, err := sqlx.Open("sqlite3", td.dbFileName)
 	td.db = db
-	if err != nil{
+	if err != nil {
 		log.Fatal(err.Error())
 	}
 }
 
-func (td *ToDoListSqlite) Init() error{
-	if dbFileOpen := td.openDBFile(); dbFileOpen == nil{
+func (td *ToDoListSqlite) Init() error {
+	if dbFileOpen := td.openDBFile(); dbFileOpen == nil {
 		return errors.New("to do list already exists in this directory.\n to remove it type: td rm")
 	}
 
@@ -81,11 +83,11 @@ func (td *ToDoListSqlite) Init() error{
 			CREATE TABLE IF NOT EXISTS %s
 			(id INTEGER PRIMARY KEY, do TEXT, doBy TIMESTAMP, createdAt TIMESTAMP)
 		`, td.toDoTableName)))
-		
+
 	return nil
 }
 
- func (td *ToDoListSqlite) ExecLogError(sql string) sql.Result{
+func (td *ToDoListSqlite) ExecLogError(sql string) sql.Result {
 	db := td.db
 	res, err := db.Exec(sql)
 	if err != nil {
@@ -94,33 +96,32 @@ func (td *ToDoListSqlite) Init() error{
 	return res
 }
 
-
-func (td *ToDoListSqlite) Add(item *ToDoListItem) error{
+func (td *ToDoListSqlite) Add(item *ToDoListItem) error {
 
 	sqlInsert := (fmt.Sprintf(`
 			INSERT INTO %s
 			(do , doBy, createdAt)
 			VALUES
 			(:do, :doBy, :createdAt)
-		`, td.toDoTableName, ))
+		`, td.toDoTableName))
 	res, err := td.db.NamedExec(sqlInsert, &item)
-	if err != nil{
+	if err != nil {
 		return err
-	}else{
-		if rows, err := res.RowsAffected(); rows != 1{
-			if err != nil{
+	} else {
+		if rows, err := res.RowsAffected(); rows != 1 {
+			if err != nil {
 				return err
 			}
 			return errors.New("multiple rows created for a single insertion")
-		}else{
+		} else {
 			insertedId, _ := res.LastInsertId()
-			item.Id = (int) (insertedId)
+			item.Id = (int)(insertedId)
 		}
 	}
 	return nil
 }
 
-func (td *ToDoListSqlite) SelectWithId(id int) ([]ToDoListItem, error){
+func (td *ToDoListSqlite) SelectWithId(id int) ([]ToDoListItem, error) {
 	var itemsWithId []ToDoListItem
 
 	selectWithId := (fmt.Sprintf(`
@@ -132,18 +133,18 @@ func (td *ToDoListSqlite) SelectWithId(id int) ([]ToDoListItem, error){
 	return itemsWithId, err
 }
 
-func (td *ToDoListSqlite) Remove(item ToDoListItem) int{
+func (td *ToDoListSqlite) Remove(item ToDoListItem) int {
 	// This function is best effort. We first try to remove entries with item.idId.
 	deleteWithId := (fmt.Sprintf(`
 			DELETE FROM %s
 			WHERE Id='%d'
 	`, td.toDoTableName, item.Id))
-	
-	var deleted int64 
+
+	var deleted int64
 	res := td.ExecLogError(deleteWithId)
 	deleted, _ = res.RowsAffected()
-	if(deleted > 0){
-		return (int) (deleted)
+	if deleted > 0 {
+		return (int)(deleted)
 	}
 
 	// Failing that, we try to remove any items with a matching Do
@@ -155,7 +156,7 @@ func (td *ToDoListSqlite) Remove(item ToDoListItem) int{
 	res = td.ExecLogError(deleteLikeDo)
 	deleted, _ = res.RowsAffected()
 
-	return (int) (deleted)
+	return (int)(deleted)
 }
 
 func (td *ToDoListSqlite) Pop() {
@@ -164,7 +165,7 @@ func (td *ToDoListSqlite) Pop() {
 	`, td.toDoTableName))
 	var returnResult []ToDoListItem
 	err := td.db.Select(&returnResult, selectMaxId)
-	if err != nil{
+	if err != nil {
 		log.Fatal(err.Error())
 	}
 
@@ -174,12 +175,12 @@ func (td *ToDoListSqlite) Pop() {
 			DELETE FROM %s WHERE id=%d 
 			`, td.toDoTableName, maxIdRecord.Id))
 		res := td.ExecLogError(deleteMaxId)
-		if deleted, _ := res.RowsAffected(); deleted > 0{
-			fmt.Printf("Removed %d records",  100)
+		if deleted, _ := res.RowsAffected(); deleted > 0 {
+			fmt.Printf("Removed %d records", 100)
 			return
 		}
 
-	}else if numRecords > 1{
+	} else if numRecords > 1 {
 		log.Fatalf("failed to determine most recent to do list item. Got %d records", numRecords)
 	}
 }

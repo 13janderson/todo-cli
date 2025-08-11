@@ -1,13 +1,12 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"todo/todo"
-	"todo/format"
 	"github.com/spf13/cobra"
+	"todo/format"
+	"todo/todo"
 )
 
 // initCmd represents the init command
@@ -15,9 +14,9 @@ var initCmd = &cobra.Command{
 	Use: "init",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := todo.DefaultToDoListSqlite().Init()
-		if err == nil{
+		if err == nil {
 			format.ShowSuccessMessage("to do list initialised")
-		}else{
+		} else {
 			format.ShowErrorMessage(err.Error())
 		}
 	},

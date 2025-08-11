@@ -3,57 +3,65 @@ package format
 import (
 	"fmt"
 	"math"
+	"os"
+	"path"
 	"strings"
 	"time"
 	"todo/todo"
+
 	"github.com/fatih/color"
 )
 
 func Indent(msg string) string {
 	var ret string
 	lines := strings.Split(msg, "\n")
-	for _, l := range lines{
+	for _, l := range lines {
 		ret += formatIndent(l) + "\n"
 	}
 	return ret
 }
 
-func formatIndent(msg string) string{
+func formatIndent(msg string) string {
 	return fmt.Sprintf("%*s %s", 4, "", msg)
 }
 
-func RemovedMessage(msg string){
+func RemovedMessage(msg string) {
 	color.Set(color.Bold)
 	color.Red(Indent(msg))
 }
 
-func ShowWarningMessage(msg string){
+func ShowWarningMessage(msg string) {
 	color.Set(color.Bold)
 	color.Yellow(Indent(msg))
 }
 
-func ShowErrorMessage(msg string){
+func ShowErrorMessage(msg string) {
 	color.Set(color.Bold)
 	color.Red(Indent(msg))
 }
 
-func ShowDirectoryMessage(directory string){
-	ShowInformationMessage((fmt.Sprintf("/%s", directory)))
+func ShowCwdMessage() {
+	cwd, _ := os.Getwd()
+	ShowDirectoryMessage(path.Base(cwd))
 }
 
-func ShowInformationMessage(msg string){
+func ShowDirectoryMessage(directory string) {
+	ShowInformationMessage((fmt.Sprintf("%s", directory)))
+}
+
+func ShowInformationMessage(msg string) {
 	color.Set(color.Bold)
 	color.RGB(255, 255, 255).Print(Indent(msg))
 }
 
-func ShowSuccessMessage(msg string){
+func ShowSuccessMessage(msg string) {
 	color.Set(color.Bold)
 	color.RGB(0, 255, 20).Print(Indent(msg))
 }
 
-func DurationHumanReadable(d time.Duration) string{
+func DurationHumanReadable(d time.Duration) string {
 	var parts []string
-	
+
 	day := time.Hour * 24
 	days := int(d / day)
 	afterDays := d - time.Duration(days)*day
@@ -75,42 +83,40 @@ func DurationHumanReadable(d time.Duration) string{
 
 }
 
-
-func ShowToDoListItems(tdl []todo.ToDoListItem){
-	for _, td := range tdl{
+func ShowToDoListItems(tdl []todo.ToDoListItem) {
+	for _, td := range tdl {
 		remainingTime := td.RemainingTime()
 		// Want the colour to get progressively more red and less green until expiry
-		if remainingTime <= time.Duration(0){
+		if remainingTime <= time.Duration(0) {
 			showToDoListItemExpired(td)
-		}else{
+		} else {
 			showToDoListItemByRemainingTimeFraction(td, td.RemainingTimeFraction())
 		}
 	}
 }
 
-func showToDoListItemExpired(td todo.ToDoListItem){
+func showToDoListItemExpired(td todo.ToDoListItem) {
 	color.Red(Indent(fmt.Sprintf("[%d] %s EXPIRED", td.Id, td.Do)))
 }
 
-
-func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64 ){
+func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64) {
 	color.Set(color.Bold)
 	remainingTime := td.RemainingTime()
 	output := Indent(fmt.Sprintf("%s %s", td.String(), DurationHumanReadable(remainingTime)))
-	switch{
-		case remainingTimeFraction == 0:
-			showToDoListItemExpired(td)
-		case remainingTimeFraction < 0.33:
-			color.RGB(255, 165, 0).Print(output)
-		case remainingTimeFraction < 0.66:
-			color.RGB(255, 255, 0).Print(output)
-		default:
-			color.RGB(0, 255, 0).Print(output)
+	switch {
+	case remainingTimeFraction == 0:
+		showToDoListItemExpired(td)
+	case remainingTimeFraction < 0.33:
+		color.RGB(255, 165, 0).Print(output)
+	case remainingTimeFraction < 0.66:
+		color.RGB(255, 255, 0).Print(output)
+	default:
+		color.RGB(0, 255, 0).Print(output)
 	}
 }
 
 // Similar to function above but we normalise the remaining time fractions
-func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem){
+func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem) {
 	max := -math.MaxFloat64
 	var remainingTimeFractions []float64
 
@@ -132,7 +138,7 @@ func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem){
 
 	for i, rtf := range remainingTimeFractions {
 		// Scale between 0.3 and 1.0
-		if rtf != 0{
+		if rtf != 0 {
 			rtf = minScale + (rtf * (maxScale - minScale))
 		}
 

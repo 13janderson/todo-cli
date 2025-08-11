@@ -4,63 +4,39 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"os"
+	"errors"
+	"fmt"
 	"todo/format"
 	"todo/todo"
-	"path/filepath"
+
 	"github.com/spf13/cobra"
 )
 
-var lsCmd = &cobra.Command{
-	Use:   "ls",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			format.ShowErrorMessage("this command does not support any arguments. \n proper usage: td ls")
-		}
-
-		recursive, _ := cmd.Flags().GetBool("recursive")
-		if recursive{
-			showListInDirectoryRecursive(0, ".")
-		}else{
-			showList()
-		}
+var lsCmd = NewToDoCommand(ToDoCommand{
+	cmd: &cobra.Command{
+		Use: "ls",
 	},
-}
-
-const MAX_DEPTH = 3
-func showListInDirectoryRecursive(currentDepth int, directory string){
-
-	showListDirectory(directory)
-	if currentDepth == MAX_DEPTH{
-		return
-	}
-
-	dirs, _ := os.ReadDir(directory)
-	// if len(dirs) == 0{
-	// 	return
-	// }
-	for _, dir := range dirs{
-		if dir.IsDir(){
-			dirPath := filepath.Join(directory, dir.Name())
-			showListInDirectoryRecursive(currentDepth+1, dirPath)
+	pre: func(args ...string) error {
+		if len(args) > 0 {
+			return errors.New("this command does not support any arguments. \n proper usage: td ls")
 		}
-	}
-}
+		return nil
+	},
+	run:                 showList,
+	recursive:           true,
+	recursiveFlagString: fmt.Sprintf("recursive listing with max depth of %d.", MAX_DEPTH),
+})
 
-func showListDirectory(directory string){
-	items, err := todo.DefaultToDoListSqliteInDirectory(directory).List()
-	if err == nil{
-		format.ShowDirectoryMessage(directory)
-		format.ShowToDoListItems(items)
-	}
-}
-
-
-func showList() {
-	items, err := todo.DefaultToDoListSqlite().List()
-	if err != nil{
-		format.ShowWarningMessage(err.Error())
-	}else{
+func showList(recursive bool, _ ...string) {
+	items, err := todo.DefaultToDoListSqliteCwd().List()
+	// We only want to show the warning that the list was not initialised if we are not running this
+	// command recursively
+	if err != nil {
+		if !recursive {
+			format.ShowWarningMessage(err.Error())
+		}
+	} else {
+		format.ShowCwdMessage()
 		format.ShowToDoListItems(items)
 	}
 }
@@ -76,5 +52,4 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	lsCmd.PersistentFlags().BoolP("recursive", "r", false, "Recursive listing with max depth of 5.")
 }
