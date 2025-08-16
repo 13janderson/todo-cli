@@ -31,7 +31,7 @@ var rmCmd = NewToDoCommand(ToDoCommand{
 
 		return nil
 	},
-	run: func(_ AdditionalArgs, args ...string) {
+	run: func(_ bool, args ...string) {
 		parser := NewParser(args)
 		id, err := parser.GetArgInt(0)
 

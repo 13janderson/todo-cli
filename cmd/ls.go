@@ -27,18 +27,17 @@ var lsCmd = NewToDoCommand(ToDoCommand{
 	recursiveFlagString: fmt.Sprintf("recursive listing with max depth of %d.", MAX_DEPTH),
 })
 
-func showList(args AdditionalArgs, _ ...string) {
+func showList(recursive bool, _ ...string) {
 	items, err := todo.DefaultToDoListSqliteCwd().List()
 	// We only want to show the warning that the list was not initialised if we are not running this
 	// command recursively
 	if err != nil {
-		if !args.recursive {
+		if !recursive {
 			format.ShowWarningMessage(err.Error())
 		}
 	} else {
-		depth := args.depth
-		format.ShowCwdMessage(depth)
-		format.ShowToDoListItems(items, depth)
+		format.ShowCwdMessage()
+		format.ShowToDoListItems(items)
 	}
 }
 

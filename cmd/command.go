@@ -10,14 +10,8 @@ import (
 const MAX_DEPTH = 3
 
 type FnArgs struct {
-	fn             func(additionalArgs AdditionalArgs, args ...string)
-	additionalArgs AdditionalArgs
-	args           []string
-}
-
-type AdditionalArgs struct {
-	recursive bool
-	depth     int
+	fn   func(recursive bool, args ...string)
+	args []string
 }
 
 type ToDoCommand struct {
@@ -25,7 +19,7 @@ type ToDoCommand struct {
 	pre func(args ...string) error
 	// What to run for each invocation of this command, this is ran recursively
 	// if recursive is passed as true
-	run func(additionalArgs AdditionalArgs, args ...string)
+	run func(recursive bool, args ...string)
 	// Whether this command supports recursive use over directories
 	recursive bool
 	// Help displayed for recursive flag
@@ -55,16 +49,11 @@ func NewToDoCommand(toDoCommand ToDoCommand) *cobra.Command {
 		if recursive {
 			// Recursively run the command
 			RunRecursive(FnArgs{
-				additionalArgs: AdditionalArgs{
-					recursive: true,
-				},
 				fn:   toDoCommand.run,
 				args: args,
 			}, 0)
 		} else if !recursive || err != nil {
-			toDoCommand.run(AdditionalArgs{
-				recursive: false,
-			}, args...)
+			toDoCommand.run(false, args...)
 		}
 
 	}
@@ -72,7 +61,7 @@ func NewToDoCommand(toDoCommand ToDoCommand) *cobra.Command {
 }
 
 func (fnArgs FnArgs) Call() {
-	fnArgs.fn(fnArgs.additionalArgs, fnArgs.args...)
+	fnArgs.fn(true, fnArgs.args...)
 }
 
 func RunRecursive(fnArgs FnArgs, depth int) {
@@ -94,7 +83,6 @@ func RunRecursive(fnArgs FnArgs, depth int) {
 			// Need to change the directory
 			// fmt.Printf("chdir: %s", cwd)
 			os.Chdir(dirPath)
-			fnArgs.additionalArgs.depth = depth
 			RunRecursive(fnArgs, depth+1)
 			// fmt.Println("chdir: ../")
 			os.Chdir("../")

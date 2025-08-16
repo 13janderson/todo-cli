@@ -11,6 +11,46 @@ import (
 	"todo/todo"
 )
 
+const INDENT_INCREMENT = 4
+
+type State struct {
+	cwd         string
+	indentLevel int
+}
+
+func GetCwd() string {
+	cwd, _ := os.Getwd()
+	return cwd
+}
+
+var state State = State{
+	cwd:         GetCwd(),
+	indentLevel: INDENT_INCREMENT,
+}
+
+func pathLen(filepath string) int {
+	dir, _ := path.Split(filepath)
+	if dir == "" || dir == "/" {
+		return 0
+	}
+	return 1 + pathLen(path.Clean(dir))
+}
+
+// Updates the current working directory within our state
+// Updates the indent level based on the difference between the previous cwd and the current cwd
+// For convenience, this returns the new indent level
+func (st *State) CwdUpdate() int {
+	lastCwd := st.cwd
+	cwd := GetCwd()
+	st.cwd = cwd
+	st.indentLevel += INDENT_INCREMENT * (pathLen(cwd) - pathLen(lastCwd))
+
+	return st.indentLevel
+}
+
+// We want to format according to this global state now... determine the difference in file paths
+// from the state.cwd and the actual cwd
+
 func Indent(msg string) string {
 	var ret string
 	lines := strings.Split(msg, "\n")
@@ -20,26 +60,8 @@ func Indent(msg string) string {
 	return ret
 }
 
-func IndentN(msg string, d int) string {
-	var ret string
-	lines := strings.Split(msg, "\n")
-	for _, l := range lines {
-		ret += formatIndentN(l, d) + "\n"
-		fmt.Printf("IndentNret: \n%s", ret)
-	}
-	return ret
-}
-
 func formatIndent(msg string) string {
-	return fmt.Sprintf("%*s %s", 4, "", msg)
-}
-
-func formatIndentN(msg string, d int) string {
-	// fmt.Printf("formatIndentN depth: %d", d)
-	indent := int(math.Min(float64(d), float64(1)))
-	ret := fmt.Sprintf("%*s %s", 4*indent, "", msg)
-	fmt.Printf("formatindentNret: \n%s", ret)
-	return ret
+	return fmt.Sprintf("%*s %s", state.CwdUpdate(), "", msg)
 }
 
 func RemovedMessage(msg string) {
@@ -57,10 +79,9 @@ func ShowErrorMessage(msg string) {
 	color.Red(Indent(msg))
 }
 
-func ShowCwdMessage(depth int) {
-	fmt.Printf("ShowCwdMessage: %d\n", depth)
+func ShowCwdMessage() {
 	cwd, _ := os.Getwd()
-	ShowDirectoryMessage(formatIndentN(path.Base(cwd), depth))
+	ShowDirectoryMessage(path.Base(cwd))
 }
 
 func ShowDirectoryMessage(directory string) {
@@ -101,34 +122,29 @@ func DurationHumanReadable(d time.Duration) string {
 
 }
 
-func ShowToDoListItems(tdl []todo.ToDoListItem, depth int) {
+func ShowToDoListItems(tdl []todo.ToDoListItem) {
 	for _, td := range tdl {
 		remainingTime := td.RemainingTime()
 		// Want the colour to get progressively more red and less green until expiry
 		if remainingTime <= time.Duration(0) {
-			showToDoListItemExpired(td, depth)
+			showToDoListItemExpired(td)
 		} else {
-			showToDoListItemByRemainingTimeFraction(td, td.RemainingTimeFraction(), depth)
+			showToDoListItemByRemainingTimeFraction(td, td.RemainingTimeFraction())
 		}
 	}
 }
 
-func showToDoListItemExpired(td todo.ToDoListItem, depth int) {
-	color.Red(IndentN(fmt.Sprintf("[%d] %s EXPIRED", td.Id, td.Do), depth))
+func showToDoListItemExpired(td todo.ToDoListItem) {
+	color.Red(Indent(fmt.Sprintf("[%d] %s EXPIRED", td.Id, td.Do)))
 }
 
-// hate having to pass the depth around everywher... this feels fucking terrible
-// what if we just made the format stateful and aware of how the cwd is changing over time within a
-// single run of the program
-
-func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64, depth int) {
-	fmt.Printf("showToDoListItemByRemainingTimeFraction depth: %d\n", depth)
+func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64) {
 	color.Set(color.Bold)
 	remainingTime := td.RemainingTime()
-	output := IndentN(fmt.Sprintf("%s %s", td.String(), DurationHumanReadable(remainingTime)), depth)
+	output := Indent(fmt.Sprintf("%s %s", td.String(), DurationHumanReadable(remainingTime)))
 	switch {
 	case remainingTimeFraction == 0:
-		showToDoListItemExpired(td, depth)
+		showToDoListItemExpired(td)
 	case remainingTimeFraction < 0.33:
 		color.RGB(255, 165, 0).Print(output)
 	case remainingTimeFraction < 0.66:
@@ -139,7 +155,7 @@ func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTime
 }
 
 // Similar to function above but we normalise the remaining time fractions
-func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem, depth int) {
+func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem) {
 	max := -math.MaxFloat64
 	var remainingTimeFractions []float64
 
@@ -165,6 +181,6 @@ func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem, depth int) {
 			rtf = minScale + (rtf * (maxScale - minScale))
 		}
 
-		showToDoListItemByRemainingTimeFraction(tdl[i], rtf, depth)
+		showToDoListItemByRemainingTimeFraction(tdl[i], rtf)
 	}
 }
