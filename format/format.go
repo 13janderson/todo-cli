@@ -81,8 +81,7 @@ func ShowErrorMessage(msg string) {
 
 func ShowCwdMessage() {
 	cwd, _ := os.Getwd()
-	// ShowDirectoryMessage(path.Base(cwd))
-	ShowDirectoryMessage(cwd)
+	ShowDirectoryMessage(path.Base(cwd))
 }
 
 func ShowDirectoryMessage(directory string) {
