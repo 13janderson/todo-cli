@@ -36,8 +36,9 @@ func showList(args AdditionalArgs, _ ...string) {
 			format.ShowWarningMessage(err.Error())
 		}
 	} else {
-		format.ShowCwdMessage(args.depth)
-		format.ShowToDoListItems(items)
+		depth := args.depth
+		format.ShowCwdMessage(depth)
+		format.ShowToDoListItems(items, depth)
 	}
 }
 

@@ -20,13 +20,26 @@ func Indent(msg string) string {
 	return ret
 }
 
+func IndentN(msg string, d int) string {
+	var ret string
+	lines := strings.Split(msg, "\n")
+	for _, l := range lines {
+		ret += formatIndentN(l, d) + "\n"
+		fmt.Printf("IndentNret: \n%s", ret)
+	}
+	return ret
+}
+
 func formatIndent(msg string) string {
 	return fmt.Sprintf("%*s %s", 4, "", msg)
 }
 
-func formatIndentN(msg string, n int) string {
-	indent := int(math.Min(float64(n), float64(1)))
-	return fmt.Sprintf("%*s %s", 4*indent, "", msg)
+func formatIndentN(msg string, d int) string {
+	// fmt.Printf("formatIndentN depth: %d", d)
+	indent := int(math.Min(float64(d), float64(1)))
+	ret := fmt.Sprintf("%*s %s", 4*indent, "", msg)
+	fmt.Printf("formatindentNret: \n%s", ret)
+	return ret
 }
 
 func RemovedMessage(msg string) {
@@ -45,6 +58,7 @@ func ShowErrorMessage(msg string) {
 }
 
 func ShowCwdMessage(depth int) {
+	fmt.Printf("ShowCwdMessage: %d\n", depth)
 	cwd, _ := os.Getwd()
 	ShowDirectoryMessage(formatIndentN(path.Base(cwd), depth))
 }
@@ -87,29 +101,34 @@ func DurationHumanReadable(d time.Duration) string {
 
 }
 
-func ShowToDoListItems(tdl []todo.ToDoListItem) {
+func ShowToDoListItems(tdl []todo.ToDoListItem, depth int) {
 	for _, td := range tdl {
 		remainingTime := td.RemainingTime()
 		// Want the colour to get progressively more red and less green until expiry
 		if remainingTime <= time.Duration(0) {
-			showToDoListItemExpired(td)
+			showToDoListItemExpired(td, depth)
 		} else {
-			showToDoListItemByRemainingTimeFraction(td, td.RemainingTimeFraction())
+			showToDoListItemByRemainingTimeFraction(td, td.RemainingTimeFraction(), depth)
 		}
 	}
 }
 
-func showToDoListItemExpired(td todo.ToDoListItem) {
-	color.Red(Indent(fmt.Sprintf("[%d] %s EXPIRED", td.Id, td.Do)))
+func showToDoListItemExpired(td todo.ToDoListItem, depth int) {
+	color.Red(IndentN(fmt.Sprintf("[%d] %s EXPIRED", td.Id, td.Do), depth))
 }
 
-func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64) {
+// hate having to pass the depth around everywher... this feels fucking terrible
+// what if we just made the format stateful and aware of how the cwd is changing over time within a
+// single run of the program
+
+func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTimeFraction float64, depth int) {
+	fmt.Printf("showToDoListItemByRemainingTimeFraction depth: %d\n", depth)
 	color.Set(color.Bold)
 	remainingTime := td.RemainingTime()
-	output := Indent(fmt.Sprintf("%s %s", td.String(), DurationHumanReadable(remainingTime)))
+	output := IndentN(fmt.Sprintf("%s %s", td.String(), DurationHumanReadable(remainingTime)), depth)
 	switch {
 	case remainingTimeFraction == 0:
-		showToDoListItemExpired(td)
+		showToDoListItemExpired(td, depth)
 	case remainingTimeFraction < 0.33:
 		color.RGB(255, 165, 0).Print(output)
 	case remainingTimeFraction < 0.66:
@@ -120,7 +139,7 @@ func showToDoListItemByRemainingTimeFraction(td todo.ToDoListItem, remainingTime
 }
 
 // Similar to function above but we normalise the remaining time fractions
-func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem) {
+func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem, depth int) {
 	max := -math.MaxFloat64
 	var remainingTimeFractions []float64
 
@@ -146,6 +165,6 @@ func ShowToDoListItemsNormalised(tdl []todo.ToDoListItem) {
 			rtf = minScale + (rtf * (maxScale - minScale))
 		}
 
-		showToDoListItemByRemainingTimeFraction(tdl[i], rtf)
+		showToDoListItemByRemainingTimeFraction(tdl[i], rtf, depth)
 	}
 }

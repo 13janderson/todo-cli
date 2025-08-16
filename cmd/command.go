@@ -1,11 +1,10 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
 	"todo/format"
-
-	"github.com/spf13/cobra"
 )
 
 const MAX_DEPTH = 3
