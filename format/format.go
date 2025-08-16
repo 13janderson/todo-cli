@@ -2,14 +2,13 @@ package format
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"math"
 	"os"
-	"path"
+	// "path"
 	"strings"
 	"time"
 	"todo/todo"
-
-	"github.com/fatih/color"
 )
 
 func Indent(msg string) string {
@@ -42,7 +41,8 @@ func ShowErrorMessage(msg string) {
 
 func ShowCwdMessage() {
 	cwd, _ := os.Getwd()
-	ShowDirectoryMessage(path.Base(cwd))
+	// ShowDirectoryMessage(path.Base(cwd))
+	ShowDirectoryMessage(cwd)
 }
 
 func ShowDirectoryMessage(directory string) {

@@ -159,7 +159,7 @@ func (td *ToDoListSqlite) Remove(item ToDoListItem) int {
 	return (int)(deleted)
 }
 
-func (td *ToDoListSqlite) Pop() {
+func (td *ToDoListSqlite) Pop() (int, error) {
 	selectMaxId := (fmt.Sprintf(`
 		SELECT MAX(id) as id FROM %s
 	`, td.toDoTableName))
@@ -176,26 +176,33 @@ func (td *ToDoListSqlite) Pop() {
 			`, td.toDoTableName, maxIdRecord.Id))
 		res := td.ExecLogError(deleteMaxId)
 		if deleted, _ := res.RowsAffected(); deleted > 0 {
-			fmt.Printf("Removed %d records", 100)
-			return
+			return int(deleted), nil
 		}
 
 	} else if numRecords > 1 {
-		log.Fatalf("failed to determine most recent to do list item. Got %d records", numRecords)
+		return -1, errors.New(fmt.Sprintf("failed to determine most recent to do list item. Got %d records", numRecords))
 	}
+
+	return -1, nil
 }
 
-func (td *ToDoListSqlite) Extend(item ToDoListItem) error {
+func (td *ToDoListSqlite) Extend(item ToDoListItem) (int, error) {
 	updateWithId := (fmt.Sprintf(`
 		UPDATE %s SET doBy=:doBy
 		WHERE id=:id
 	`, td.toDoTableName))
 
-	_, err := td.db.NamedExec(updateWithId, &item)
-	return err
+	res, err := td.db.NamedExec(updateWithId, &item)
+
+	if updated, _ := res.RowsAffected(); updated > 0 {
+		return int(updated), nil
+	}
+
+	return -1, err
 }
 
 func (td *ToDoListSqlite) Complete(item ToDoListItem) {
+	// TODO... get it
 	td.Remove(item)
 }
 

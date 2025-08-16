@@ -27,9 +27,13 @@ var extCmd = NewToDoCommand(ToDoCommand{
 			"td ext 2 2h extends duration of entry with id 2 by 2 hours",
 		}, "\n"),
 	},
+	recursive: true,
 	pre: func(args ...string) error {
-		if len(args) != 2 {
-			return errors.New("this command requires exactly 2 arguments. \n proper usage: td ext x ?(d/h)")
+		lenArgs := len(args)
+		if lenArgs == 0 {
+			return errors.New("this command at least 1 arugment")
+		} else if lenArgs > 2 {
+			return errors.New("this command takes at most 2 arugments")
 		}
 		return nil
 	},
@@ -78,9 +82,12 @@ var extCmd = NewToDoCommand(ToDoCommand{
 		}
 
 		toDoListItem.DoBy = doBy
-		err = todo.DefaultToDoListSqlite().Extend(toDoListItem)
+		ext, err := todo.DefaultToDoListSqlite().Extend(toDoListItem)
 		if err == nil {
+			format.ShowSuccessMessage(fmt.Sprintf("Extended %d records", ext))
 			format.ShowSuccessMessage(toDoListItem.String())
+		} else {
+			format.ShowErrorMessage(err.Error())
 		}
 	},
 })
