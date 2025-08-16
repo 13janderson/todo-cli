@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"todo/format"
@@ -59,14 +58,12 @@ func NewToDoCommand(toDoCommand ToDoCommand) *cobra.Command {
 			RunRecursive(FnArgs{
 				additionalArgs: AdditionalArgs{
 					recursive: true,
-					depth:     0,
 				},
 				fn:   toDoCommand.run,
 				args: args,
-			})
+			}, 0)
 		} else if !recursive || err != nil {
 			toDoCommand.run(AdditionalArgs{
-				depth:     0,
 				recursive: false,
 			}, args...)
 		}
@@ -79,11 +76,9 @@ func (fnArgs FnArgs) Call() {
 	fnArgs.fn(fnArgs.additionalArgs, fnArgs.args...)
 }
 
-func RunRecursive(fnArgs FnArgs) {
+func RunRecursive(fnArgs FnArgs, depth int) {
 	// fmt.Printf("depth: %d", depth)
 	// Call the function
-	depth := fnArgs.additionalArgs.depth
-	fmt.Println(depth)
 	fnArgs.Call()
 
 	if depth == MAX_DEPTH {
@@ -100,8 +95,8 @@ func RunRecursive(fnArgs FnArgs) {
 			// Need to change the directory
 			// fmt.Printf("chdir: %s", cwd)
 			os.Chdir(dirPath)
-			fnArgs.additionalArgs.depth += 1
-			RunRecursive(fnArgs)
+			fnArgs.additionalArgs.depth = depth
+			RunRecursive(fnArgs, depth+1)
 			// fmt.Println("chdir: ../")
 			os.Chdir("../")
 		}
