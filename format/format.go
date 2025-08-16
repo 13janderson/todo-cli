@@ -5,11 +5,51 @@ import (
 	"github.com/fatih/color"
 	"math"
 	"os"
-	// "path"
+	"path"
 	"strings"
 	"time"
 	"todo/todo"
 )
+
+const INDENT_INCREMENT = 4
+
+type State struct {
+	cwd         string
+	indentLevel int
+}
+
+func GetCwd() string {
+	cwd, _ := os.Getwd()
+	return cwd
+}
+
+var state State = State{
+	cwd:         GetCwd(),
+	indentLevel: INDENT_INCREMENT,
+}
+
+func pathLen(filepath string) int {
+	dir, _ := path.Split(filepath)
+	if dir == "" || dir == "/" {
+		return 0
+	}
+	return 1 + pathLen(path.Clean(dir))
+}
+
+// Updates the current working directory within our state
+// Updates the indent level based on the difference between the previous cwd and the current cwd
+// For convenience, this returns the new indent level
+func (st *State) CwdUpdate() int {
+	lastCwd := st.cwd
+	cwd := GetCwd()
+	st.cwd = cwd
+	st.indentLevel += INDENT_INCREMENT * (pathLen(cwd) - pathLen(lastCwd))
+
+	return st.indentLevel
+}
+
+// We want to format according to this global state now... determine the difference in file paths
+// from the state.cwd and the actual cwd
 
 func Indent(msg string) string {
 	var ret string
@@ -21,7 +61,7 @@ func Indent(msg string) string {
 }
 
 func formatIndent(msg string) string {
-	return fmt.Sprintf("%*s %s", 4, "", msg)
+	return fmt.Sprintf("%*s %s", state.CwdUpdate(), "", msg)
 }
 
 func RemovedMessage(msg string) {
