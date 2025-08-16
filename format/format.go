@@ -5,7 +5,7 @@ import (
 	"github.com/fatih/color"
 	"math"
 	"os"
-	// "path"
+	"path"
 	"strings"
 	"time"
 	"todo/todo"
@@ -24,6 +24,11 @@ func formatIndent(msg string) string {
 	return fmt.Sprintf("%*s %s", 4, "", msg)
 }
 
+func formatIndentN(msg string, n int) string {
+	indent := int(math.Min(float64(n), float64(1)))
+	return fmt.Sprintf("%*s %s", 4*indent, "", msg)
+}
+
 func RemovedMessage(msg string) {
 	color.Set(color.Bold)
 	color.Red(Indent(msg))
@@ -39,10 +44,9 @@ func ShowErrorMessage(msg string) {
 	color.Red(Indent(msg))
 }
 
-func ShowCwdMessage() {
+func ShowCwdMessage(depth int) {
 	cwd, _ := os.Getwd()
-	// ShowDirectoryMessage(path.Base(cwd))
-	ShowDirectoryMessage(cwd)
+	ShowDirectoryMessage(formatIndentN(path.Base(cwd), depth))
 }
 
 func ShowDirectoryMessage(directory string) {

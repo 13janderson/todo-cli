@@ -1,20 +1,33 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"fmt"
 	"os"
 	"path/filepath"
 	"todo/format"
+
+	"github.com/spf13/cobra"
 )
 
 const MAX_DEPTH = 3
+
+type FnArgs struct {
+	fn             func(additionalArgs AdditionalArgs, args ...string)
+	additionalArgs AdditionalArgs
+	args           []string
+}
+
+type AdditionalArgs struct {
+	recursive bool
+	depth     int
+}
 
 type ToDoCommand struct {
 	cmd *cobra.Command
 	pre func(args ...string) error
 	// What to run for each invocation of this command, this is ran recursively
 	// if recursive is passed as true
-	run func(recursive bool, args ...string)
+	run func(additionalArgs AdditionalArgs, args ...string)
 	// Whether this command supports recursive use over directories
 	recursive bool
 	// Help displayed for recursive flag
@@ -44,30 +57,34 @@ func NewToDoCommand(toDoCommand ToDoCommand) *cobra.Command {
 		if recursive {
 			// Recursively run the command
 			RunRecursive(FnArgs{
+				additionalArgs: AdditionalArgs{
+					recursive: true,
+					depth:     0,
+				},
 				fn:   toDoCommand.run,
 				args: args,
-			}, 0)
+			})
 		} else if !recursive || err != nil {
-			toDoCommand.run(false, args...)
+			toDoCommand.run(AdditionalArgs{
+				depth:     0,
+				recursive: false,
+			}, args...)
 		}
 
 	}
 	return toDoCommand.cmd
 }
 
-type FnArgs struct {
-	fn   func(recursive bool, args ...string)
-	args []string
+func (fnArgs FnArgs) Call() {
+	fnArgs.fn(fnArgs.additionalArgs, fnArgs.args...)
 }
 
-func (fnArgs FnArgs) Call(recursive bool) {
-	fnArgs.fn(recursive, fnArgs.args...)
-}
-
-func RunRecursive(fnArgs FnArgs, depth int) {
+func RunRecursive(fnArgs FnArgs) {
 	// fmt.Printf("depth: %d", depth)
 	// Call the function
-	fnArgs.Call(true)
+	depth := fnArgs.additionalArgs.depth
+	fmt.Println(depth)
+	fnArgs.Call()
 
 	if depth == MAX_DEPTH {
 		return
@@ -83,7 +100,8 @@ func RunRecursive(fnArgs FnArgs, depth int) {
 			// Need to change the directory
 			// fmt.Printf("chdir: %s", cwd)
 			os.Chdir(dirPath)
-			RunRecursive(fnArgs, depth+1)
+			fnArgs.additionalArgs.depth += 1
+			RunRecursive(fnArgs)
 			// fmt.Println("chdir: ../")
 			os.Chdir("../")
 		}
