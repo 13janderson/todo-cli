@@ -1,7 +1,8 @@
 ## Demo video
-<video src="./video/demo.mp4" width="720" height="405" controls></video>
+<video src="https://github.com/user-attachments/assets/8016bd9a-719f-4c8a-9b9f-1cbe8f934cf5" width="720" height="405" controls></video>
 
 ## What is this project?
+
 Elegant cli to do list that currently operates on a directory by directory basis. Commands are inspired by that of git: init, rm, add, ls...
 
 ## How to install
