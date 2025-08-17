@@ -9,6 +9,11 @@ import (
 
 const MAX_DEPTH = 3
 
+type FnArgs struct {
+	fn   func(recursive bool, args ...string)
+	args []string
+}
+
 type ToDoCommand struct {
 	cmd *cobra.Command
 	pre func(args ...string) error
@@ -55,19 +60,14 @@ func NewToDoCommand(toDoCommand ToDoCommand) *cobra.Command {
 	return toDoCommand.cmd
 }
 
-type FnArgs struct {
-	fn   func(recursive bool, args ...string)
-	args []string
-}
-
-func (fnArgs FnArgs) Call(recursive bool) {
-	fnArgs.fn(recursive, fnArgs.args...)
+func (fnArgs FnArgs) Call() {
+	fnArgs.fn(true, fnArgs.args...)
 }
 
 func RunRecursive(fnArgs FnArgs, depth int) {
 	// fmt.Printf("depth: %d", depth)
 	// Call the function
-	fnArgs.Call(true)
+	fnArgs.Call()
 
 	if depth == MAX_DEPTH {
 		return
