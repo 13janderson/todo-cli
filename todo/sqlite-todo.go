@@ -45,13 +45,20 @@ func (td *ToDoListSqlite) openDBFile() error {
 	if _, err := os.Open(td.dbFileName); err != nil {
 		return err
 	}
-	return nil
+
+	// Do not read if the file is symlinked
+	fileInfo, err := os.Lstat(td.dbFileName)
+	if fileInfo.Mode()&os.ModeSymlink != 0 {
+		return errors.New("ToDo list File is symlinked, not reading it.")
+	}
+
+	return err
 }
 
 func (td *ToDoListSqlite) List() ([]ToDoListItem, error) {
 	var allItems []ToDoListItem
 	if dbFileOpen := td.openDBFile(); dbFileOpen != nil {
-		return allItems, errors.New("to list was not initalised.\nrun td init first")
+		return allItems, errors.New("Could not read to do list, it may not be initialised.\nRun td init first")
 	}
 
 	// Select all entries in DB
