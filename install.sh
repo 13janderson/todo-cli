@@ -5,5 +5,7 @@ fi
 
 echo "Buiding as $alias"
 go build -o $alias
-echo "Copying as $alias to $GOPATH"
-cp $alias $GOPATH/bin
+build_path=$GOPATH/bin
+echo "Copying as $alias to $build_path"
+mkdir -p $build_path
+cp $alias $build_path/$alias
